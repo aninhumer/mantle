@@ -1,0 +1,240 @@
+\documentstyle[12pt,a4]{article}
+\begin{document}
+
+%Deliverables
+%Evaluation detail
+
+\vfil
+
+\centerline{\Large Computer Science Project Proposal}
+\vspace{0.4in}
+\centerline{\Large Building HDL abstractions from an RTL 
+model in Haskell}
+\vspace{0.4in}
+\centerline{\large Alex Horsman, Homerton College}
+\vspace{0.3in}
+\centerline{\large 11th October 2012}
+
+\vfil
+
+
+\noindent
+{\bf Project Supervisor:} Dr. Simon Moore
+\vspace{0.2in}
+
+\noindent
+{\bf Director of Studies:} Dr. Bogdan Roman
+\vspace{0.2in}
+\noindent
+ 
+\noindent
+{\bf Project Overseers:}
+Dr. Peter Robinson \& Dr. Robert Watson
+
+\vfil
+
+\section*{Introduction}
+
+Currently, the only widely supported hardware description 
+languages are Verilog and VHDL. While these languages are a 
+vast improvement on older techniques of manual circuit 
+design, as designs become ever more complex, more powerful 
+languages will be needed.
+
+Existing alternatives these low level languages usually 
+provide a higher level model which is then compiled to 
+Verilog.  However in many cases, while the model is 
+effective at designing certain kinds of system, it can be 
+awkward to use for others.  Additionally, the compiler may 
+not be able to make use of microarchitectural tricks that 
+would usually be used by a designer at a lower level.
+
+In order to provide multiple powerful abstractions, while 
+still allowing microarchitectural freedom where it is 
+desired, the aim of this project is to start with a low 
+level model, and build higher level models on top of it.  
+These higher level models can then be connected together 
+through a common interface, such that each component of a 
+system can be created in an appropriate abstract model.
+
+Haskell has many properties useful for this goal. Its syntax 
+is very flexible, allowing arbitrary binary operators to be 
+defined, and providing a notation for monadic operations. In 
+addition, its type system allows very powerful abstractions 
+and generalisations to be made, while maintaining type 
+safety.
+
+\section*{Starting Point}
+
+There are a few of relevant libraries in the Haskell package 
+database which I may use in my project. In particular there 
+are some libraries for working with VHDL and Verilog. It is 
+likely I will also make use of other more general libraries 
+from this package database as well.
+In addition, during the summer, I created a library for 
+abstracting connections in Bluespec, and I may use a similar 
+design in my language's library.
+
+\section*{Substance and Structure}
+
+The core of the project will consist of three components. A 
+representation for RTL circuit models, a generator to 
+transform the representation to Verilog code, and a series 
+of library functions for working with the representation, 
+which should be designed to form an embedded language.
+
+The RTL representation will essentially represent a subset 
+of Verilog, indicating what registers exist, what logic 
+connects them, and what signal edges trigger an update.  
+Other features of Verilog may be included if it turns out 
+their reimplementation at a higher level is either less 
+efficient, or cumbersome. For example, it may prove useful 
+to be able to describe a module hierarchy, to assist the 
+Verilog compiler by providing synthesis boundaries. This 
+representation will exist as a data type in Haskell.
+
+As the representation will correspond closely to Verilog, 
+generating this code will involve a relatively simple 
+transformation. Each register is given a name and defined, 
+similarly intermediate logical values must be named and 
+assigned, and finally register update logic is produced as a 
+set of "always" blocks representing the different triggers.  
+
+While it would be possible to use the constructors of the 
+internal representation as a language to describe hardware 
+directly, this is unlikely to be particularly convenient, 
+and so a set of library functions will be written to make it 
+easier to build circuit representations.
+
+One key feature of the library will be to provide a common 
+interface for communicating between circuits described at 
+different levels of abstraction. The suggested interface is 
+structural groups of input and output wires, which can be 
+constrained and abstracted as appropriate in each higher 
+level model. For example, a model based on guarded channels 
+could constrain its wire interfaces to have appropriate 
+guard signals, and expose these as channels internally.
+
+Once the library is created, the project will, as an 
+extension, explore various higher level abstractions built 
+on top of this base.  For example, one simple model which 
+covers many use cases, is single clock synchronous circuits, 
+where all register updates are triggered by the same clock 
+transition.
+
+\section*{Evaluation}
+
+During the creation of the system, a series of hardware 
+examples will be created. This will be used to test the 
+functionality of the system, and also to compare with 
+existing implementations using other languages, such as 
+SystemVerilog and Bluespec.
+
+The main intention of the system is that the code needed to 
+create the hardware will be simpler, so this will be the 
+main aspect of the comparison. This is of course, somewhat 
+subjective, so in addition to a qualitative comparison, a 
+few metrics will be compared, such as lines of code.
+
+It is of course also important that any simplicity in 
+creation does not come at a significant cost of performance 
+in the final design. In order to test this, comparisons will 
+also be made of logic elements used, and maximum frequencies 
+of the designs produced in the different languages.
+
+\section*{Success Criterion}
+
+\begin{enumerate}
+
+\item
+An internal representation of RTL circuit description must 
+be designed and implemented.
+
+\item
+A program must be written to transform this representation 
+into valid Verilog source code.
+
+\item
+A set of functions must be written, which provide an 
+embedded language for creating RTL circuit descriptions, in 
+the internal representation.
+
+\item
+Simple hardware examples should be created in the language 
+to demonstrate the project works.
+
+\item
+Hardware implemented using the language should be compared 
+with implementations in other languages, in terms of code 
+length as well as logic elements used.
+
+\end{enumerate}
+
+\section*{Plan of Work}
+
+\begin{enumerate}
+
+\item
+{\bf 19th October - 2nd November: }
+Read papers on Lava, and other related languages. Research 
+Verilog synthesis semantics. Set up computers with 
+appropriate simulation and synthesis software, and 
+familiarise myself with its usage.
+
+\item
+{\bf 2nd November - 16th November: }
+Design and implement the underlying RTL representation.
+
+\item
+{\bf 16th November - 1st December: }
+Create the Verilog generator, and test with some very simple 
+hardware examples.
+
+\item
+{\bf 1st December - 15th December:}
+Implement a simple set of functions for building RTL 
+circuits, and use them to create some slightly more complex 
+examples.
+
+\item
+{\bf 15th December - 31st December: }
+Implement an abstraction for groups of signals.
+
+\item
+{\bf 31st December - 18th January:}
+Write progress report. At this stage, the project should be 
+capable of describing simple RTL systems, and producing 
+correct Verilog to implement them.
+
+\item
+{\bf 18th January - 25th January: }
+Prepare progress presentation.
+
+\item
+{\bf 25th January - 22nd February: }
+Implement a simpler interface for creating synchronous 
+systems. Explore other extensions.
+
+\item
+{\bf 22nd February - 22nd March: }
+Write first draft of dissertation.
+
+\item
+{\bf 22nd March - 5th April:}
+Break to focus on revision, and await feedback.
+
+\item
+{\bf 5th April - 21st April: }
+Any further work as suggested. Revise and print 
+dissertation.
+
+\end{enumerate}
+
+\section*{Resources Required}
+
+I will be using my own computers for the majority of the 
+project work. For backup, I will keep my project in a git 
+repository, and regularly push it to a number of locations, 
+including Github, Dropbox and my external hard drive.
+
+\end{document}
