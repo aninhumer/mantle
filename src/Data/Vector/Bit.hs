@@ -28,7 +28,7 @@ module Data.Vector.Bit (
   unpackInteger, packInteger, unpackInt, packInt,
 
   -- * Utilities
-  pad, padMax, zipPad, trimLeading
+  pad, padMax, zipPad, zipPadWith, trimLeading
   )
 
 where
