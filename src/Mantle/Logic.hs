@@ -3,10 +3,18 @@
 
 module Mantle.Logic where
 
+import Prelude hiding (
+    (&&), (||), not,
+    (==), (/=),
+    (<), (>), (<=), (>=),
+    min, max,
+    (/))
+
 import Data.Bits
 import Data.Bits.Bool
 import Data.Vector.Bit
 import Data.Boolean
+import Data.Boolean.Overload
 
 import Mantle.RTL
 
@@ -48,6 +56,6 @@ instance (Integral a, Bits a) => Num (Logic a) where
     (-) = binOp OpSub
     (*) = binOp OpMul
     negate = unOp OpNegate
-    abs x = ifB (x >* 0) x (negate x)
-    signum x = ifB (x >* 0) 1 (ifB (x <* 0) (negate 1) 0)
+    abs x = ifB (x > 0) x (negate x)
+    signum x = ifB (x > 0) 1 (ifB (x < 0) (-1) 0)
     fromInteger = literal . fromInteger
