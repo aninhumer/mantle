@@ -1,5 +1,4 @@
 {-# LANGUAGE Rank2Types #-}
-{-# LANGUAGE ImpredicativeTypes #-}
 
 module Mantle.RTL where
 
