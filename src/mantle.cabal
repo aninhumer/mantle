@@ -1,0 +1,10 @@
+name: Mantle
+version: 0.0.1
+cabal-version: >= 1.10
+build-type: Simple
+
+library
+    default-language: Haskell2010
+    build-depends: base >= 4 && < 5, Boolean >= 0.1.0, vector >= 0.9.1
+    exposed-modules: Mantle.RTL, Mantle.Logic
+    other-extensions: Rank2Types, TypeFamilies, FlexibleInstances, TypeSynonymInstances, ViewPatterns
