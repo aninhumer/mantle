@@ -24,10 +24,12 @@ type LogicRef = Int
 
 type RegRef = Int
 
-data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv
+data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
                     | OpAnd | OpOr
                     | OpEqual | OpNotEq
                     | OpLT | OpGT | OpLTE | OpGTE
+                    | OpShiftL | OpShiftR
+                    | OpBitAnd | OpBitOr | OpBitXor
                     -- ...
 
 data UnaryOperator = OpNegate | OpNot -- ...
