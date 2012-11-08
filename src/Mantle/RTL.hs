@@ -1,4 +1,3 @@
-{-# LANGUAGE Rank2Types #-}
 
 module Mantle.RTL where
 
