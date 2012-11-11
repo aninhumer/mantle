@@ -1,12 +1,14 @@
+{-# LANGUAGE TemplateHaskell #-}
 
 module Mantle.RTL where
 
+import Data.Lens.Template
 import Data.Vector.Bit
 
 data RTL = RTL {
-    wires     :: [Wire],
-    registers :: [Register],
-    blocks    :: [Block]
+    _wires     :: [Wire],
+    _registers :: [Register],
+    _blocks    :: [Block]
 }
 
 data Wire = Wire Int (Maybe Expr)
@@ -53,3 +55,4 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 
 data UnaryOperator = OpNegate | OpNot -- ...
 
+$( makeLens ''RTL )
