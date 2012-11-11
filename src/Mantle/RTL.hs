@@ -4,13 +4,36 @@ module Mantle.RTL where
 import Data.Vector.Bit
 
 data RTL = RTL {
-    logic      :: [Maybe (Int,Expr)],
-    registers  :: [Register],
-    triggers   :: [Trigger]
+    wires     :: [Wire],
+    registers :: [Register],
+    blocks    :: [Block]
 }
 
+data Wire = Wire Int (Maybe Expr)
+
+type WireRef = Int
+
+type Register = Int
+
+type RegRef = Int
+
+data Block =
+    Latch
+      { condition :: WireRef,
+        updates   :: [Update] }
+  | Sync
+      { clock     :: WireRef,
+        updates   :: [Update] }
+  | SyncReset
+      { clock     :: WireRef,
+        updates   :: [Update],
+        reset     :: WireRef,
+        resets    :: [Update] }
+
+data Update = Update RegRef WireRef
+
 data Expr = Lit BitVector
-          | Var LogicRef
+          | Var WireRef
           | Acc RegRef
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
@@ -19,9 +42,6 @@ data Expr = Lit BitVector
           | BitRange Expr Int Int
           | Concat [Expr]
 
-type LogicRef = Int
-
-type RegRef = Int
 
 data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
                     | OpAnd | OpOr
@@ -33,9 +53,3 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 
 data UnaryOperator = OpNegate | OpNot -- ...
 
-data Register = Register Trigger LogicRef
-
-data Trigger = PosEdge LogicRef
-             | NegEdge LogicRef
-             | BothEdge LogicRef
-             | Trigs [Trigger]
