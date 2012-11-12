@@ -21,7 +21,7 @@ type RegRef = Int
 
 data Block =
     Latch
-      { condition :: WireRef,
+      { condition :: Expr,
         updates   :: [Update] }
   | Sync
       { clock     :: WireRef,
@@ -32,7 +32,7 @@ data Block =
         reset     :: WireRef,
         resets    :: [Update] }
 
-data Update = Update RegRef WireRef
+data Update = Update RegRef Expr
 
 data Expr = Lit BitVector
           | Var WireRef
