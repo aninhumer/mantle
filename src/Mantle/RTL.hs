@@ -24,13 +24,17 @@ data Block =
       { condition :: Expr,
         updates   :: [Update] }
   | Sync
-      { clock     :: WireRef,
+      { clock     :: Clock,
         updates   :: [Update] }
   | SyncReset
-      { clock     :: WireRef,
+      { clock     :: Clock,
         updates   :: [Update],
-        reset     :: WireRef,
+        reset     :: Reset,
         resets    :: [Update] }
+
+newtype Clock = Clock WireRef
+
+newtype Reset = Reset WireRef
 
 data Update = Update RegRef Expr
 
