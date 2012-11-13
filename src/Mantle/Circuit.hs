@@ -59,3 +59,6 @@ latch (Logic cond) = do
 sync :: Circuit c => Clock -> Reset -> c (SyncRef)
 sync clk rst = do
     addWithIndex syncs $ Sync clk M.empty rst M.empty
+
+rd :: Reg a -> Logic a
+rd (Reg r) = Logic $ Acc r
