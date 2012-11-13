@@ -4,39 +4,41 @@ module Mantle.RTL where
 
 import Control.Lens.TH
 import Data.Vector.Bit
+import Data.Sequence
+import Data.Map
 
 data RTL = RTL {
-    _wires     :: [Wire],
-    _registers :: [Register],
-    _blocks    :: [Block]
+    _wires     :: Seq Wire,
+    _registers :: Seq RegSize,
+    _latches   :: Seq Latch,
+    _syncs     :: Seq Sync
 }
 
 data Wire = Wire Int (Maybe Expr)
 
 type WireRef = Int
 
-type Register = Int
+type RegSize = Int
 
 type RegRef = Int
 
-data Block =
-    Latch
-      { condition :: Expr,
-        updates   :: [Update] }
-  | Sync
-      { clock     :: Clock,
-        updates   :: [Update] }
-  | SyncReset
-      { clock     :: Clock,
-        updates   :: [Update],
-        reset     :: Reset,
-        resets    :: [Update] }
+data Latch = Latch {
+    _condition    :: Expr,
+    _latchUpdates :: RegWrites
+}
+
+data Sync = Sync {
+    _clock        :: Clock,
+    _clockUpdates :: RegWrites,
+    _reset        :: Reset,
+    _resetUpdates :: RegWrites
+}
 
 newtype Clock = Clock WireRef
 
 newtype Reset = Reset WireRef
 
-data Update = Update RegRef Expr
+type RegWrites = Map RegRef Expr
 
 data Expr = Lit BitVector
           | Var WireRef
@@ -60,3 +62,5 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 data UnaryOperator = OpNegate | OpNot -- ...
 
 $( makeLenses ''RTL )
+$( makeLenses ''Latch )
+$( makeLenses ''Sync )
