@@ -27,12 +27,16 @@ data Latch = Latch {
     _latchUpdates :: RegWrites
 }
 
+type LatchRef = Int
+
 data Sync = Sync {
     _clock        :: Clock,
     _clockUpdates :: RegWrites,
     _reset        :: Reset,
     _resetUpdates :: RegWrites
 }
+
+type SyncRef = Int
 
 newtype Clock = Clock WireRef
 

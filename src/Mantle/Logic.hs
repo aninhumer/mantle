@@ -23,6 +23,9 @@ newtype Logic a = Logic { expr :: Expr }
 literal :: Bits a => a -> Logic a
 literal x = Logic $ Lit (unpack x)
 
+variable :: Bits a => WireRef -> Logic a
+variable x = Logic $ Var x
+
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
 
