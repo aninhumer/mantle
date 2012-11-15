@@ -46,19 +46,18 @@ newtype Reg a = Reg RegRef
 
 register :: forall a c. (Circuit c, Bits a) => c (Reg a)
 register = do
-    ref <- uses wires length
-    registers |>= size
+    ref <- registers `addWithIndex` size
     return $ Reg ref
   where
     size = bitSize (undefined :: a)
 
 latch :: Circuit c => Logic Bool -> c (LatchRef)
 latch (Logic cond) = do
-    addWithIndex latches $ Latch cond M.empty
+    latches `addWithIndex` Latch cond M.empty
 
 sync :: Circuit c => Clock -> Reset -> c (SyncRef)
 sync clk rst = do
-    addWithIndex syncs $ Sync clk M.empty rst M.empty
+    syncs `addWithIndex` Sync clk M.empty rst M.empty
 
 rd :: Reg a -> Logic a
 rd (Reg r) = Logic $ Acc r

@@ -19,19 +19,19 @@ type Synchronous sc = (MonadReader SyncRef sc, Circuit sc)
 
 syncBlock :: (Synchronous sc, Functor f) => sc (LensLike f RTL RTL Sync Sync)
 syncBlock = do
-    ref :: Int <- ask
+    ref <- ask
     return $ syncs . ordinal ref
 
 (=:) :: Synchronous sc => Reg a -> Logic a -> sc ()
 (Reg r) =: (Logic e) = do
     blk <- syncBlock 
-    blk.clockUpdates %= M.insert r e
+    blk.clockUpdates.at r ?= e
     return ()
 
 reg :: (Bits a, Synchronous c) => a -> c (Reg a)
 reg x = do
     val @ (Reg r) <- register
     blk <- syncBlock
-    blk.resetUpdates %= M.insert r (Lit $ unpack x)
+    blk.resetUpdates.at r ?= (Lit $ unpack x)
     return val
 
