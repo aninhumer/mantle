@@ -14,7 +14,10 @@ data RTL = RTL {
     _syncs     :: Seq Sync
 }
 
-data Wire = Wire Int (Maybe Expr)
+data Wire = Wire {
+    _width :: Int,
+    _comb  :: Maybe Expr
+}
 
 type WireRef = Int
 
@@ -66,5 +69,6 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 data UnaryOperator = OpNegate | OpNot -- ...
 
 $( makeLenses ''RTL )
+$( makeLenses ''Wire )
 $( makeLenses ''Latch )
 $( makeLenses ''Sync )
