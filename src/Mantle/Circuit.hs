@@ -23,17 +23,18 @@ addWithIndex lens x = do
     lens %= (|> x)
     return ref
 
-type Circuit c = MonadState RTL c
+type Circuit = State RTL
 
+type MonadCircuit = MonadState RTL
 
-emptyWire :: forall a c. (Circuit c, Bits a) => c (Logic a)
+emptyWire :: forall a c. (MonadCircuit c, Bits a) => c (Logic a)
 emptyWire = do
     ref <- wires `addWithIndex` Wire size Nothing
     return $ variable ref
   where
     size = bitSize (undefined :: a)
 
-wire :: forall a c. (Circuit c, Bits a) => Logic a -> c (Logic a)
+wire :: forall a c. (MonadCircuit c, Bits a) => Logic a -> c (Logic a)
 wire (Logic e) = do
     ref <- wires `addWithIndex` Wire size (Just e)
     return $ variable ref
@@ -42,18 +43,18 @@ wire (Logic e) = do
 
 newtype Reg a = Reg RegRef
 
-register :: forall a c. (Circuit c, Bits a) => c (Reg a)
+register :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
 register = do
     ref <- registers `addWithIndex` size
     return $ Reg ref
   where
     size = bitSize (undefined :: a)
 
-latch :: Circuit c => Logic Bool -> c (LatchRef)
+latch :: MonadCircuit c => Logic Bool -> c (LatchRef)
 latch (Logic cond) = do
     latches `addWithIndex` Latch cond M.empty
 
-sync :: Circuit c => Clock -> Reset -> c (SyncRef)
+sync :: MonadCircuit c => Clock -> Reset -> c (SyncRef)
 sync clk rst = do
     syncs `addWithIndex` Sync clk M.empty rst M.empty
 

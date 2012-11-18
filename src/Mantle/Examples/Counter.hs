@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 
 import Data.Bits
@@ -7,9 +6,9 @@ import Mantle.Logic
 import Mantle.Circuit
 import Mantle.Synchronous
 
-counter :: forall a sc. (Integral a, Bits a, Synchronous sc) => sc (Logic a)
+counter :: Synchronous (Logic Int)
 counter = do
-    val <- reg (0 :: a)
+    val <- reg 0
     val =: (rd val + 1)
-    return $ rd val
+    return (rd val)
 

@@ -6,6 +6,7 @@ module Mantle.Synchronous where
 
 import Control.Lens
 import Control.Monad.Reader
+import Control.Monad.State
 import qualified Data.Map as M
 import Data.Sequence.Lens
 import Data.Bits
@@ -15,20 +16,22 @@ import Mantle.Logic
 import Mantle.RTL
 import Mantle.Circuit
 
-type Synchronous sc = (MonadReader SyncRef sc, Circuit sc)
+type Synchronous = ReaderT SyncRef (State RTL)
 
-syncBlock :: (Synchronous sc, Functor f) => sc (LensLike f RTL RTL Sync Sync)
+type MonadSync s = (MonadCircuit s, MonadReader SyncRef s)
+
+syncBlock :: (MonadSync sc, Functor f) => sc (LensLike f RTL RTL Sync Sync)
 syncBlock = do
     ref <- ask
     return $ syncs . ordinal ref
 
-(=:) :: Synchronous sc => Reg a -> Logic a -> sc ()
+(=:) :: MonadSync sc => Reg a -> Logic a -> sc ()
 (Reg r) =: (Logic e) = do
     blk <- syncBlock 
     blk.clockUpdates.at r ?= e
     return ()
 
-reg :: (Bits a, Synchronous c) => a -> c (Reg a)
+reg :: (Bits a, MonadSync c) => a -> c (Reg a)
 reg x = do
     val @ (Reg r) <- register
     blk <- syncBlock
