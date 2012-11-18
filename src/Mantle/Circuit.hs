@@ -25,8 +25,6 @@ addWithIndex lens x = do
 
 type Circuit c = MonadState RTL c
 
-(|>=) :: MonadState s c => Simple Setter s (Seq a) -> a -> c ()
-x |>= y = x %= (|>y)
 
 emptyWire :: forall a c. (Circuit c, Bits a) => c (Logic a)
 emptyWire = do
