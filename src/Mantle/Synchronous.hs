@@ -1,5 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE LiberalTypeSynonyms #-}
 {-# LANGUAGE ConstraintKinds #-}
 
 module Mantle.Synchronous where
@@ -20,7 +21,7 @@ type Synchronous = ReaderT SyncRef (State RTL)
 
 type MonadSync s = (MonadCircuit s, MonadReader SyncRef s)
 
-syncBlock :: (MonadSync sc, Functor f) => sc (LensLike f RTL RTL Sync Sync)
+syncBlock :: (MonadSync sc, Functor f) => sc (Simple (LensLike f) RTL Sync)
 syncBlock = do
     ref <- ask
     return $ syncs . ordinal ref
