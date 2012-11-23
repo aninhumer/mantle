@@ -4,55 +4,45 @@ module Mantle.RTL where
 
 import Control.Lens.TH
 import Data.Vector.Bit
-import Data.Sequence
-import Data.Map
+import Data.String
+import qualified Data.Sequence as S
+import qualified Data.Map as M
+import qualified Data.Set as Set
+
 
 data RTL = RTL {
-    _wires     :: Seq Wire,
-    _registers :: Seq RegSize,
-    _latches   :: Seq Latch,
-    _syncs     :: Seq Sync
+    _vars   :: M.Map Name Variable,
+    _blocks :: M.Map Trigger Block
 }
 
-data Wire = Wire {
-    _width :: Int,
-    _comb  :: Maybe Expr
+newtype Name = Name { name :: String }
+    deriving (Eq, Ord, Show)
+
+data Variable = Variable {
+    _varType :: VarType,
+    _width   :: Int
 }
 
-type WireRef = Int
+data VarType = WireVar | RegVar
 
-type RegSize = Int
+type Trigger = Set.Set Edge
 
-type RegRef = Int
+data Edge = PosEdge Name
+          | NegEdge Name
+          | EitherEdge Name
+          deriving (Eq,Ord)
 
-data Latch = Latch {
-    _condition    :: Expr,
-    _latchUpdates :: RegWrites
-}
+type Block = S.Seq Statement
 
-type LatchRef = Int
-
-data Sync = Sync {
-    _clock        :: Clock,
-    _clockUpdates :: RegWrites,
-    _reset        :: Reset,
-    _resetUpdates :: RegWrites
-}
-
-type SyncRef = Int
-
-newtype Clock = Clock WireRef
-
-newtype Reset = Reset WireRef
-
-type RegWrites = Map RegRef Expr
+data Statement = Cond Expr [Statement] [Statement]
+            | BlockingAssign Name Expr
+            | AsyncAssign Name Expr
 
 data Expr = Lit BitVector
-          | Var WireRef
-          | Acc RegRef
+          | Var Name
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
-          | Cond Expr Expr Expr
+          | CondE Expr Expr Expr
           | BitSel Expr Expr -- Left must be name, needs better solution
           | BitRange Expr Int Int
           | Concat [Expr]
@@ -69,6 +59,4 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 data UnaryOperator = OpNegate | OpNot -- ...
 
 $( makeLenses ''RTL )
-$( makeLenses ''Wire )
-$( makeLenses ''Latch )
-$( makeLenses ''Sync )
+$( makeLenses ''Variable )

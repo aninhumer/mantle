@@ -17,14 +17,15 @@ import Data.Boolean
 import Data.Boolean.Overload
 
 import Mantle.RTL
+import Mantle.Circuit
 
 newtype Logic a = Logic { expr :: Expr }
 
 literal :: Bits a => a -> Logic a
 literal x = Logic $ Lit (unpack x)
 
-variable :: Bits a => WireRef -> Logic a
-variable x = Logic $ Var x
+rd :: Reg a -> Logic a
+rd = Logic . Var . regVar
 
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
@@ -42,7 +43,7 @@ instance Boolean (Logic Bool) where
 type instance BooleanOf (Logic a) = Logic Bool
 
 instance IfB (Logic a) where
-    ifB c x y = Logic $ Cond (expr c) (expr x) (expr y)
+    ifB c x y = Logic $ CondE (expr c) (expr x) (expr y)
 
 instance EqB (Logic a) where
     (==*) = binOp OpEqual
