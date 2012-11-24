@@ -1,14 +1,10 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 
 module Mantle.Logic where
 
-import Prelude hiding (
-    (&&), (||), not,
-    (==), (/=),
-    (<), (>), (<=), (>=),
-    min, max,
-    (/))
+import Mantle.Prelude
 
 import Data.Bits
 import Data.Bits.Bool
