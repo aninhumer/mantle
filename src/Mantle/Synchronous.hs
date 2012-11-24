@@ -20,24 +20,23 @@ newtype Clock = Clock { clockVar :: Name }
 newtype Reset = Reset { resetVar :: Name }
 
 data Sync = Sync {
-    _initial :: M.Map Name BitVector,
-    _updates :: M.Map Name Expr
+    syncInitials :: [(Name,BitVector)],
+    syncUpdates  :: [(Name,Expr)]
 }
 
 instance Monoid Sync where
-    mempty  = Sync M.empty M.empty
-    mappend (Sync xi xu) (Sync yi yu) =
-        Sync (xi `M.union` yi) (xu `M.union` yu)
+    mempty  = Sync [] []
+    mappend (Sync xi xu) (Sync yi yu) = Sync (xi ++ yi) (xu ++ yu)
 
 type Synchronous = WriterT Sync (State RTL)
 
 (<=:) :: Reg a -> Logic a -> Synchronous ()
 (Reg r) <=: (Logic e) = do
-    tell $ Sync M.empty (M.singleton r e)
+    tell $ Sync [] [(r,e)]
 
 reg :: Bits a => a -> Synchronous (Reg a)
 reg x = do
     r @ (Reg n) <- freshReg
-    tell $ Sync (M.singleton n $ unpack x) M.empty
+    tell $ Sync [(n,unpack x)] []
     return r
 
