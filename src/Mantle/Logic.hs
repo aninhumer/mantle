@@ -9,8 +9,6 @@ import Mantle.Prelude
 import Data.Bits
 import Data.Bits.Bool
 import Data.Vector.Bit
-import Data.Boolean
-import Data.Boolean.Overload
 
 import Mantle.RTL
 import Mantle.Circuit
