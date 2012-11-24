@@ -49,7 +49,7 @@ data Expr = Lit BitVector
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
           | CondE Expr Expr Expr
-          | BitSel Expr Expr -- Left must be name, needs better solution
+          | BitSel Name Expr
           | BitRange Expr Int Int
           | Concat [Expr]
 
