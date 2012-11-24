@@ -5,10 +5,11 @@
 
 module Mantle.Circuit where
 
-import Prelude hiding (length)
+import Prelude hiding (length, mapM_)
 
-import Control.Monad.State
+import Control.Monad.State hiding (mapM_)
 import Control.Lens
+import Data.Foldable
 import Data.Bits
 import qualified Data.Map as M
 import qualified Data.Sequence as S
@@ -21,6 +22,9 @@ type MonadCircuit = MonadState RTL
 
 emptyRTL :: RTL
 emptyRTL = RTL M.empty M.empty
+
+makeCircuit :: Circuit a -> RTL
+makeCircuit c = execState c emptyRTL
 
 namedVariable :: MonadCircuit c => Name -> Variable -> c ()
 namedVariable n v = do
@@ -64,4 +68,10 @@ freshReg = do
     n <- freshVariable $ Variable RegVar size
     return $ Reg n
     where size = bitSize (undefined :: a)
+
+addStmt :: MonadCircuit c => Trigger -> Statement -> c ()
+addStmt t s = blocks %= M.insertWith (S.><) t (S.singleton s)
+
+addStmts :: MonadCircuit c => Trigger -> S.Seq Statement -> c ()
+addStmts t ss = mapM_ (addStmt t) ss
 
