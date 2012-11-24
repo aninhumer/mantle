@@ -16,7 +16,13 @@ data RTL = RTL {
 }
 
 newtype Name = Name { name :: String }
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
+
+instance Show Name where
+    show = name
+
+instance IsString Name where
+    fromString = Name
 
 data Variable = Variable {
     _varType :: VarType,
