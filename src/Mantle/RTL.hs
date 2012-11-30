@@ -40,7 +40,7 @@ data Edge = PosEdge Name
 
 type Block = S.Seq Statement
 
-data Statement = Cond Expr [Statement] [Statement]
+data Statement = Cond Expr Block Block
             | BlockingAssign Name Expr
             | AsyncAssign Name Expr
 
