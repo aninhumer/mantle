@@ -22,12 +22,12 @@ genDecls vs = vcat $ map (uncurry genDecl) $ M.assocs vs
 
 genDecl :: Name -> Variable -> Doc
 genDecl n (Variable vt w) =
-    keyword vt <> sizeDef w <+> dshow n <> ";"
+    keyword vt <+> sizeDef w <+> dshow n <> ";"
   where
     keyword WireVar = "wire"
     keyword RegVar  = "reg"
-    sizeDef 0 = ""
-    sizeDef n = " [0:" <> int n <> "]"
+    sizeDef 1 = ""
+    sizeDef n = "[" <> int (n-1) <> ":0]"
 
 genActions :: M.Map Trigger Block -> Doc
 genActions as = vcat $ map (uncurry genAlways) $ M.assocs as
