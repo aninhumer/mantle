@@ -6,6 +6,7 @@ module Mantle.Logic where
 
 import Mantle.Prelude
 
+import Data.Set
 import Data.Bits
 import Data.Bits.Bool
 import Data.Vector.Bit
@@ -15,11 +16,25 @@ import Mantle.Circuit
 
 newtype Logic a = Logic { expr :: Expr }
 
+always :: Trigger
+always = empty
+
+comb :: Bits a => Logic a -> Circuit (Logic a)
+comb (Logic e) = do
+    w <- freshWire
+    addStmt always $ BlockingAssign (wireVar w) e
+    return $ readWire w
+
 literal :: Bits a => a -> Logic a
 literal x = Logic $ Lit (unpack x)
 
-rd :: Reg a -> Logic a
-rd = Logic . Var . regVar
+readWire :: Wire a -> Logic a
+readWire = Logic . Var . wireVar
+
+readReg :: Reg a -> Logic a
+readReg = Logic . Var . regVar
+
+rd = readReg
 
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
