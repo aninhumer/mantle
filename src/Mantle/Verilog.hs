@@ -5,6 +5,7 @@ module Mantle.Verilog where
 import Data.Foldable
 import qualified Data.Map as M
 import qualified Data.Vector.Unboxed as V
+import qualified Data.Set as Set
 import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
 
@@ -33,7 +34,9 @@ genActions :: M.Map Trigger Block -> Doc
 genActions as = vcat $ map (uncurry genAlways) $ M.assocs as
 
 genAlways :: Trigger -> Block -> Doc
-genAlways t b = "always @" <> genTrigger t <+> genBlock b 
+genAlways t b
+    | Set.null t = "always" <+> genBlock b
+    | otherwise  = "always @" <> genTrigger t <+> genBlock b
 
 genTrigger :: Trigger -> Doc
 genTrigger = encloseSep "(" ")" "," . map genEdge . toList
