@@ -1,51 +1,59 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DataKinds #-}
 
 module Mantle.Interface where
 
+
 import Data.Bits
 
-import Mantle.RTL
 import Mantle.Circuit
 
-data Direction = Internal | External
+
+data FaceK = InnerT | OuterT
+
+type Inner ifc = Ifc ifc InnerT
+type Outer ifc = Ifc ifc OuterT
 
 class Interface ifc where
-    newIfc :: Direction -> Circuit ifc
-    setDir :: Direction -> ifc -> ifc
+    data Ifc ifc (d :: FaceK)
+    newIfc :: Circuit (Ifc ifc InnerT)
+    expose :: Ifc ifc InnerT -> Ifc ifc OuterT
 
-data Input a = Input {
-    inputWire :: Wire a,
-    inputDir  :: Direction
-}
+
+data Input a
+data Output a
 
 instance Bits a => Interface (Input a) where
-    newIfc d = do
+    data Ifc (Input a) d = InputWire (Wire a)
+    newIfc = do
         w <- freshWire
-        return $ Input w d
-    setDir d (Input x _) = Input x d
-
-data Output a = Output {
-    outputWire :: Wire a,
-    outputDir  :: Direction
-}
+        return $ InputWire w
+    expose (InputWire w) = InputWire w
 
 instance Bits a => Interface (Output a) where
-    newIfc d = do
+    data Ifc (Output a) d = OutputWire (Wire a)
+    newIfc = do
         w <- freshWire
-        return $ Output w d
-    setDir d (Output x _) = Output x d
+        return $ OutputWire w
+    expose (OutputWire w) = OutputWire w
+
+
+type Component ifc = forall a. Inner ifc -> Circuit a
+
+make :: Interface ifc => Component ifc -> Circuit (Outer ifc)
+make compF = do
+    ifc <- newIfc
+    compF ifc
+    return $ expose ifc
+
 
 instance (Interface a, Interface b) => Interface (a,b) where
-    newIfc d = do
-        x <- newIfc d
-        y <- newIfc d
-        return (x,y)
-    setDir d (x,y) = (setDir d x, setDir d y)
-
-type Component ifc = ifc -> Circuit ()
-
-make :: Interface ifc => Component ifc -> Circuit ifc
-make cf = do
-    ifc <- newIfc External
-    cf ifc
-    return $ setDir Internal ifc
+    data Ifc (a,b) d = TupleIfc (Ifc a d) (Ifc b d)
+    newIfc = do
+        x <- newIfc
+        y <- newIfc
+        return $ TupleIfc x y
+    expose (TupleIfc x y) = TupleIfc (expose x) (expose y)
