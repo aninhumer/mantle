@@ -26,46 +26,26 @@ emptyRTL = RTL M.empty M.empty
 makeCircuit :: Circuit a -> RTL
 makeCircuit c = execState c emptyRTL
 
-namedVariable :: MonadCircuit c => Name -> Variable -> c ()
-namedVariable n v = do
-    vars.at n %= tryInsert
-  where
-    tryInsert Nothing  = Just v
-    tryInsert (Just _) = error $
-        "Variable name " ++ show n ++ " already in use."
-
-freshVariable :: MonadCircuit c => Variable -> c (Name)
-freshVariable v = do
+newVariable :: MonadCircuit c => Variable -> c (Ref)
+newVariable v = do
     count <- uses vars M.size
-    let freshName = Name $ "fresh" ++ show count
-    namedVariable freshName v
-    return freshName
+    let newRef = Ref count
+    vars.at newRef ?= v
+    return newRef
 
-newtype Wire a = Wire { wireVar :: Name }
+newtype Wire a = Wire { wireVar :: Ref }
 
-namedWire :: forall a c. (MonadCircuit c, Bits a) => Name -> c (Wire a)
-namedWire n = do
-    namedVariable n $ Variable WireVar size
+newWire :: forall a c. (MonadCircuit c, Bits a) => c (Wire a)
+newWire = do
+    n <- newVariable $ Variable WireVar size
     return $ Wire n
     where size = bitSize (undefined :: a)
 
-freshWire :: forall a c. (MonadCircuit c, Bits a) => c (Wire a)
-freshWire = do
-    n <- freshVariable $ Variable WireVar size
-    return $ Wire n
-    where size = bitSize (undefined :: a)
+newtype Reg a = Reg { regVar :: Ref }
 
-newtype Reg a = Reg { regVar :: Name }
-
-namedReg :: forall a c. (MonadCircuit c, Bits a) => Name -> c (Reg a)
-namedReg n = do
-    namedVariable n $ Variable RegVar size
-    return $ Reg n
-    where size = bitSize (undefined :: a)
-
-freshReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
-freshReg = do
-    n <- freshVariable $ Variable RegVar size
+newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
+newReg = do
+    n <- newVariable $ Variable RegVar size
     return $ Reg n
     where size = bitSize (undefined :: a)
 

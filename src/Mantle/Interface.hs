@@ -29,14 +29,14 @@ data Output a
 instance Bits a => Interface (Input a) where
     data Ifc (Input a) d = InputWire (Wire a)
     newIfc = do
-        w <- freshWire
+        w <- newWire
         return $ InputWire w
     expose (InputWire w) = InputWire w
 
 instance Bits a => Interface (Output a) where
     data Ifc (Output a) d = OutputWire (Wire a)
     newIfc = do
-        w <- freshWire
+        w <- newWire
         return $ OutputWire w
     expose (OutputWire w) = OutputWire w
 

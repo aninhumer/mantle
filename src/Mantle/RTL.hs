@@ -11,18 +11,16 @@ import qualified Data.Set as Set
 
 
 data RTL = RTL {
-    _vars   :: M.Map Name Variable,
+    _vars   :: M.Map Ref Variable,
     _blocks :: M.Map Trigger Block
 }
 
-newtype Name = Name { name :: String }
+newtype Ref = Ref Int
     deriving (Eq, Ord)
 
-instance Show Name where
-    show = name
-
-instance IsString Name where
-    fromString = Name
+-- Temporary replacement for names
+instance Show Ref where
+    show (Ref i) = "a" ++ show i
 
 data Variable = Variable {
     _varType :: VarType,
@@ -33,23 +31,23 @@ data VarType = WireVar | RegVar
 
 type Trigger = Set.Set Edge
 
-data Edge = PosEdge Name
-          | NegEdge Name
-          | EitherEdge Name
+data Edge = PosEdge Ref
+          | NegEdge Ref
+          | EitherEdge Ref
           deriving (Eq,Ord)
 
 type Block = S.Seq Statement
 
 data Statement = Cond Expr Block Block
-            | BlockingAssign Name Expr
-            | AsyncAssign Name Expr
+            | BlockingAssign Ref Expr
+            | AsyncAssign Ref Expr
 
 data Expr = Lit BitVector
-          | Var Name
+          | Var Ref
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
           | CondE Expr Expr Expr
-          | BitSel Name Expr
+          | BitSel Ref Expr
           | BitRange Expr Int Int
           | Concat [Expr]
 

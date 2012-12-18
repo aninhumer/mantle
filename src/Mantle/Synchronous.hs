@@ -18,13 +18,13 @@ import Mantle.Logic
 import Mantle.RTL
 import Mantle.Circuit
 
-newtype Clock = Clock { clockVar :: Name }
+newtype Clock = Clock { clockVar :: Ref }
 
-newtype Reset = Reset { resetVar :: Name }
+newtype Reset = Reset { resetVar :: Ref }
 
 data Sync = Sync {
-    syncInitials :: [(Name,BitVector)],
-    syncUpdates  :: [(Name,Expr)]
+    syncInitials :: [(Ref,BitVector)],
+    syncUpdates  :: [(Ref,Expr)]
 }
 
 instance Monoid Sync where
@@ -55,7 +55,7 @@ makeSync clk rst s = do
 
 reg :: Bits a => a -> Synchronous (Reg a)
 reg x = do
-    r @ (Reg n) <- freshReg
+    r @ (Reg n) <- newReg
     tell $ Sync [(n,unpack x)] []
     return r
 

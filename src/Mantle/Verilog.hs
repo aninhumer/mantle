@@ -12,16 +12,17 @@ import Text.PrettyPrint.Leijen.Text
 import Mantle.RTL
 import Mantle.Logic
 
+dshow :: Show a => a -> Doc
 dshow = text.pack.show
 
 genRTL :: RTL -> Doc
 genRTL (RTL vs bs) =
     genDecls vs <> line <$> genActions bs
 
-genDecls :: M.Map Name Variable -> Doc
+genDecls :: M.Map Ref Variable -> Doc
 genDecls vs = vcat $ map (uncurry genDecl) $ M.assocs vs
 
-genDecl :: Name -> Variable -> Doc
+genDecl :: Ref -> Variable -> Doc
 genDecl n (Variable vt w) =
     keyword vt <+> sizeDef w <+> dshow n <> ";"
   where

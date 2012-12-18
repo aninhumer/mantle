@@ -21,7 +21,7 @@ always = empty
 
 comb :: Bits a => Logic a -> Circuit (Logic a)
 comb (Logic e) = do
-    w <- freshWire
+    w <- newWire
     addStmt always $ BlockingAssign (wireVar w) e
     return $ readWire w
 
