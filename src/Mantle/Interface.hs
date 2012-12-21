@@ -14,27 +14,27 @@ import Mantle.Circuit
 
 data FaceK = InnerT | OuterT
 
-type Inner ifc = Ifc ifc InnerT
-type Outer ifc = Ifc ifc OuterT
+type Inner ifc = Ifc InnerT ifc
+type Outer ifc = Ifc OuterT ifc
 
 class Interface ifc where
-    data Ifc ifc (d :: FaceK)
-    newIfc :: Circuit (Ifc ifc InnerT)
-    expose :: Ifc ifc InnerT -> Ifc ifc OuterT
+    data Ifc (d :: FaceK) ifc
+    newIfc :: Circuit (Ifc InnerT ifc)
+    expose :: Ifc InnerT ifc -> Ifc OuterT ifc
 
 
 data Input a
 data Output a
 
 instance Bits a => Interface (Input a) where
-    data Ifc (Input a) d = InputWire (Wire a)
+    data Ifc d (Input a) = InputWire (Wire a)
     newIfc = do
         w <- newWire
         return $ InputWire w
     expose (InputWire w) = InputWire w
 
 instance Bits a => Interface (Output a) where
-    data Ifc (Output a) d = OutputWire (Wire a)
+    data Ifc d (Output a) = OutputWire (Wire a)
     newIfc = do
         w <- newWire
         return $ OutputWire w
@@ -51,7 +51,7 @@ make compF = do
 
 
 instance (Interface a, Interface b) => Interface (a,b) where
-    data Ifc (a,b) d = TupleIfc (Ifc a d) (Ifc b d)
+    data Ifc d (a,b) = TupleIfc (Ifc d a) (Ifc d b)
     newIfc = do
         x <- newIfc
         y <- newIfc
