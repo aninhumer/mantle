@@ -4,6 +4,7 @@
 import Mantle.Prelude
 
 import Mantle.Logic
+import Mantle.Interface
 import Mantle.Synchronous
 
 counter :: SyncComp (Output Int) ()
