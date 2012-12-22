@@ -22,23 +22,25 @@ type Outer ifc = Ifc OuterT ifc
 
 class Interface ifc where
     data Ifc (d :: FaceK) ifc
-    newIfc :: Circuit (Ifc InnerT ifc)
-    expose :: Ifc InnerT ifc -> Ifc OuterT ifc
+    newIfcCircuit :: Circuit (Inner ifc)
+    expose :: Inner ifc -> Outer ifc
 
+newIfc :: (Interface ifc, MonadCircuit c) => c (Inner ifc)
+newIfc = liftCircuit newIfcCircuit
 
 data Input a
 data Output a
 
 instance Bits a => Interface (Input a) where
     data Ifc d (Input a) = InputWire (Wire a)
-    newIfc = do
+    newIfcCircuit = do
         w <- newWire
         return $ InputWire w
     expose (InputWire w) = InputWire w
 
 instance Bits a => Interface (Output a) where
     data Ifc d (Output a) = OutputWire (Wire a)
-    newIfc = do
+    newIfcCircuit = do
         w <- newWire
         return $ OutputWire w
     expose (OutputWire w) = OutputWire w
@@ -66,7 +68,7 @@ make compF = do
 
 instance (Interface a, Interface b) => Interface (a,b) where
     data Ifc d (a,b) = TupleIfc (Ifc d a) (Ifc d b)
-    newIfc = do
+    newIfcCircuit = do
         x <- newIfc
         y <- newIfc
         return $ TupleIfc x y
