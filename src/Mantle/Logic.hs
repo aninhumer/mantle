@@ -13,6 +13,8 @@ import Data.Set
 import Data.Bits
 import Data.Bits.Bool
 import Data.Vector.Bit
+import Control.Monad.Writer
+import Control.Lens
 
 import Mantle.RTL
 import Mantle.Circuit
@@ -50,6 +52,13 @@ instance Bits a => Writable (Reg a) a where
 
 binOp :: BinaryOperator -> Logic a -> Logic a -> Logic b
 binOp op x y = Logic $ BinOp (expr x) op (expr y)
+newtype Signal a = Signal Expr
+
+instance Bits a => Readable (Signal a) a where
+    read (Signal e) = e
+
+readSignal :: Readable r a => r -> Signal a
+readSignal = Signal . read
 
 instance Boolean (Logic Bool) where
     true  = literal True
