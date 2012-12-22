@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 
 module Mantle.Logic where
 
@@ -14,25 +16,21 @@ import Data.Vector.Bit
 import Mantle.RTL
 import Mantle.Circuit
 
-newtype Logic a = Logic { expr :: Expr }
 
+class Bits a => Readable r a | r -> a where
+    read :: r -> Expr
 
-comb :: Bits a => Logic a -> Circuit (Logic a)
-comb (Logic e) = do
-    w <- newWire
-    addStmt always $ BlockingAssign (wireVar w) e
-    return $ readWire w
+instance Bits a => Readable (Wire a) a where
+    read = Var . wireVar
+
+instance Bits a => Readable (Reg a) a where
+    read = Var . regVar
 
 literal :: Bits a => a -> Logic a
 literal x = Logic $ Lit (unpack x)
 
-readWire :: Wire a -> Logic a
-readWire = Logic . Var . wireVar
 
-readReg :: Reg a -> Logic a
-readReg = Logic . Var . regVar
 
-rd = readReg
 
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
