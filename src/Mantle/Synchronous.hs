@@ -14,6 +14,7 @@ import qualified Data.Sequence as S
 import qualified Data.Set as Set
 import Data.Bits
 import Data.Vector.Bit
+import Data.Monoid
 
 import Mantle.RTL
 import Mantle.Circuit
@@ -46,10 +47,19 @@ makeSync cr syncF = (`runReaderT` cr) $ do
     syncF ifc
     return $ expose ifc
 
-onSync :: Clock -> Reset -> Trigger
-onSync (Clock c) (Reset r) = Set.fromList [PosEdge c, NegEdge r]
+syncTrigger :: Clock -> Reset -> Trigger
+syncTrigger (Clock c) (Reset r) =
+    posedge c <> negedge r
 
+onSync :: Statement -> Synchronous ()
+onSync stmt = do
+    (clk,rst) <- ask
+    onTrigger (syncTrigger clk rst) $ iff clk stmt
 
+onReset :: Statement -> Synchronous ()
+onReset stmt = do
+    (clk,rst) <- ask
+    onTrigger (syncTrigger clk rst) $ iff (not rst) stmt
 
 (<=:) :: Reg a -> Logic a -> Synchronous ()
 (Reg r) <=: (Logic e) = do
