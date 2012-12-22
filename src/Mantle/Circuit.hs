@@ -14,6 +14,7 @@ import Data.Foldable
 import Data.Bits
 import qualified Data.Map as M
 import qualified Data.Sequence as S
+import qualified Data.Set as Set
 
 import Mantle.RTL
 
@@ -56,9 +57,17 @@ newReg = do
         return $ Reg ref
     where size = bitSize (undefined :: a)
 
-addStmt :: MonadCircuit c => Trigger -> Statement -> c ()
-addStmt t s = blocks %= M.insertWith (S.><) t (S.singleton s)
+type Statement = StmtM ()
 
-addStmts :: MonadCircuit c => Trigger -> S.Seq Statement -> c ()
-addStmts t ss = mapM_ (addStmt t) ss
+type StmtM = Writer Block
 
+onTrigger :: MonadCircuit c => Trigger -> Statement -> c ()
+onTrigger trig stmt = do
+    let (_,newBlock) = runWriter stmt
+    circuit $ tell $ (blocks.at trig ?~ newBlock) mempty
+
+posedge :: Wire a -> Trigger
+posedge (Wire w) = Set.singleton $ PosEdge w
+
+negedge :: Wire a -> Trigger
+negedge (Wire w) = Set.singleton $ NegEdge w
