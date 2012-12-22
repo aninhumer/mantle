@@ -124,3 +124,9 @@ comb x = do
     w <- newWire
     w =: x
     return $ readSignal w
+
+iff :: Readable c Bool => c -> Statement -> Statement
+iff cond stmt = do
+    let (_,blk) = runWriter stmt
+    let c = read cond
+    tell $ (conds.at c ?~ blk) mempty
