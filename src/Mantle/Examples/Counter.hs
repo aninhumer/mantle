@@ -1,9 +1,5 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE FlexibleContexts #-}
 
-import Data.Bits
 import Mantle.Logic
-import Mantle.Circuit
 import Mantle.Synchronous
 
 counter :: Synchronous (Logic Int)

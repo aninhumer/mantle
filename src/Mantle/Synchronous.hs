@@ -1,11 +1,6 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LiberalTypeSynonyms #-}
-{-# LANGUAGE ConstraintKinds #-}
 
 module Mantle.Synchronous where
 
-import Control.Monad.State
 import Control.Monad.Writer
 import Control.Arrow (second)
 import qualified Data.Map as M
@@ -14,9 +9,9 @@ import qualified Data.Set as Set
 import Data.Bits
 import Data.Vector.Bit
 
-import Mantle.Logic
 import Mantle.RTL
 import Mantle.Circuit
+import Mantle.Logic
 
 newtype Clock = Clock { clockVar :: Ref }
 
@@ -31,7 +26,7 @@ instance Monoid Sync where
     mempty  = Sync [] []
     mappend (Sync xi xu) (Sync yi yu) = Sync (xi ++ yi) (xu ++ yu)
 
-type Synchronous = WriterT Sync (State RTL)
+type Synchronous = WriterT Sync Circuit
 
 onSync :: Clock -> Reset -> Trigger
 onSync (Clock c) (Reset r) = Set.fromList [PosEdge c, NegEdge r]

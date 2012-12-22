@@ -10,7 +10,6 @@ import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
 
 import Mantle.RTL
-import Mantle.Logic
 
 dshow :: Show a => a -> Doc
 dshow = text.pack.show

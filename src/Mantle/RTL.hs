@@ -4,7 +4,6 @@ module Mantle.RTL where
 
 import Control.Lens.TH
 import Data.Vector.Bit
-import Data.String
 import qualified Data.Sequence as S
 import qualified Data.Map as M
 import qualified Data.Set as Set
