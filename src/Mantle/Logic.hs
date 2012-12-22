@@ -8,6 +8,7 @@
 module Mantle.Logic where
 
 import Mantle.Prelude
+import qualified Prelude as P
 
 import Data.Set
 import Data.Bits
@@ -68,6 +69,13 @@ instance Boolean (Logic Bool) where
     (||*) = binOp OpOr
 
 type instance BooleanOf (Logic a) = Logic Bool
+newtype Constant a = Constant a
+
+instance Bits a => Readable (Constant a) a where
+    read (Constant x) = Lit $ unpack x
+
+fromInteger :: Integral a => Integer -> Constant a
+fromInteger = Constant . P.fromIntegral
 
 instance IfB (Logic a) where
     ifB c x y = Logic $ CondE (expr c) (expr x) (expr y)
