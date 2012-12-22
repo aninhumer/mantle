@@ -1,14 +1,18 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds #-}
 
 module Mantle.Interface where
 
+import Mantle.Prelude
 
 import Data.Bits
 
 import Mantle.Circuit
+import Mantle.Logic
 
 
 data FaceK = InnerT | OuterT
@@ -39,6 +43,17 @@ instance Bits a => Interface (Output a) where
         return $ OutputWire w
     expose (OutputWire w) = OutputWire w
 
+instance Bits a => Readable (Outer (Output a)) a where
+    read (OutputWire w) = read w
+
+instance Bits a => Bindable (Inner (Output a)) a where
+    (OutputWire w) =: e = w =: e
+
+instance Bits a => Readable (Inner (Input a)) a where
+    read (InputWire w) = read w
+
+instance Bits a => Bindable (Outer (Input a)) a where
+    (InputWire w) =: e = w =: e
 
 type Component ifc = forall a. Inner ifc -> Circuit a
 
