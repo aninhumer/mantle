@@ -4,6 +4,7 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Mantle.Logic where
 
@@ -54,14 +55,7 @@ instance Bits a => Readable (Signal a) a where
 readSignal :: Readable r a => r -> Signal a
 readSignal = Signal . read
 
-instance Boolean (Logic Bool) where
-    true  = literal True
-    false = literal False
-    notB  = unOp OpNot
-    (&&*) = binOp OpAnd
-    (||*) = binOp OpOr
 
-type instance BooleanOf (Logic a) = Logic Bool
 newtype Constant a = Constant a
 
 instance Bits a => Readable (Constant a) a where
@@ -70,12 +64,7 @@ instance Bits a => Readable (Constant a) a where
 fromInteger :: Integral a => Integer -> Constant a
 fromInteger = Constant . P.fromIntegral
 
-instance IfB (Logic a) where
-    ifB c x y = Logic $ CondE (expr c) (expr x) (expr y)
 
-instance EqB (Logic a) where
-    (==*) = binOp OpEqual
-    (/=*) = binOp OpNotEq
 literal :: Bits a => a -> Signal a
 literal x = Signal $ Lit (unpack x)
 
@@ -88,11 +77,35 @@ binOp op x y =
     Signal $ BinOp (read x) op (read y)
 
 
-instance OrdB (Logic a) where
-    (<*) = binOp OpLT
-    (>*) = binOp OpGT
-    (<=*) = binOp OpLTE
-    (>=*) = binOp OpGTE
+true, false :: Signal Bool
+true  = literal True
+false = literal False
+
+not :: Readable r Bool => r -> Signal Bool
+not = unOp OpNot
+
+(&&), (||) :: (Readable r1 Bool, Readable r2 Bool) =>
+    r1 -> r2 -> Signal Bool
+(&&) = binOp OpAnd
+(||) = binOp OpOr
+
+ifThenElse :: (Readable r1 Bool, Readable r2 a, Readable r3 a) =>
+    r1 -> r2 -> r3 -> Signal a
+ifThenElse c x y =
+    Signal $ CondE (read c) (read x) (read y)
+
+(==), (!=) :: (Readable r1 a, Readable r2 a, Eq a) =>
+    r1 -> r2 -> Signal Bool
+(==) = binOp OpEqual
+(!=) = binOp OpNotEq
+
+(<), (>), (<=), (>=) ::
+    (Readable r1 a, Readable r2 a, Ord a) =>
+    r1 -> r2 -> Signal Bool
+(<) = binOp OpLT
+(>) = binOp OpGT
+(<=) = binOp OpLTE
+(>=) = binOp OpGTE
 
 instance (Integral a, Bits a) => Num (Logic a) where
     (+) = binOp OpAdd
