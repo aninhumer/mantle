@@ -7,7 +7,7 @@ import Mantle.Logic
 import Mantle.Interface
 import Mantle.Synchronous
 
-counter :: SyncComp (Output Int) ()
+counter :: SyncComp (Output Int)
 counter out = do
     val <- reg 0
     onSync $ do

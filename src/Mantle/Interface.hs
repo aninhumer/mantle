@@ -2,7 +2,6 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE DataKinds #-}
 
 module Mantle.Interface where
@@ -57,7 +56,7 @@ instance Bits a => Readable (Inner (Input a)) a where
 instance Bits a => Bindable (Outer (Input a)) a where
     (InputWire w) =: e = w =: e
 
-type Component ifc = forall a. Inner ifc -> Circuit a
+type Component ifc = Inner ifc -> Circuit ()
 
 make :: Interface ifc => Component ifc -> Circuit (Outer ifc)
 make compF = do
