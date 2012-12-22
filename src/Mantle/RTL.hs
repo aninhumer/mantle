@@ -10,7 +10,8 @@ import qualified Data.Set as Set
 
 
 data RTL = RTL {
-    _vars   :: M.Map Ref Variable,
+    _wires  :: M.Map Ref Comb,
+    _regs   :: M.Map Ref Width,
     _blocks :: M.Map Trigger Block
 }
 
@@ -21,12 +22,12 @@ newtype Ref = Ref Int
 instance Show Ref where
     show (Ref i) = "a" ++ show i
 
-data Variable = Variable {
-    _varType :: VarType,
-    _width   :: Int
+data Comb = Comb {
+    _width :: Width,
+    _comb  :: Expr
 }
 
-data VarType = WireVar | RegVar
+type Width = Int
 
 type Trigger = Set.Set Edge
 
@@ -35,11 +36,12 @@ data Edge = PosEdge Ref
           | EitherEdge Ref
           deriving (Eq,Ord)
 
-type Block = S.Seq Statement
+data Block = Block {
+    _conds  :: M.Map Expr Block,
+    _writes :: Update
+}
 
-data Statement = Cond Expr Block Block
-            | BlockingAssign Ref Expr
-            | AsyncAssign Ref Expr
+type Update = M.Map Ref Expr
 
 data Expr = Lit BitVector
           | Var Ref
@@ -49,6 +51,7 @@ data Expr = Lit BitVector
           | BitSel Ref Expr
           | BitRange Expr Int Int
           | Concat [Expr]
+          deriving (Eq,Ord)
 
 
 data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
@@ -58,8 +61,10 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
                     | OpShiftL | OpShiftR
                     | OpBitAnd | OpBitOr | OpBitXor
                     -- ...
+                    deriving (Eq,Ord)
 
 data UnaryOperator = OpNegate | OpNot -- ...
+    deriving (Eq,Ord)
 
 $( makeLenses ''RTL )
-$( makeLenses ''Variable )
+$( makeLenses ''Block )
