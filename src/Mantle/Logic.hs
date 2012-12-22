@@ -107,11 +107,14 @@ ifThenElse c x y =
 (<=) = binOp OpLTE
 (>=) = binOp OpGTE
 
-instance (Integral a, Bits a) => Num (Logic a) where
+
+class Arith a where
+    (+), (-), (*), (/), (%) ::
+        (Readable r1 a, Readable r2 a) => r1 -> r2 -> Signal a
     (+) = binOp OpAdd
     (-) = binOp OpSub
     (*) = binOp OpMul
-    negate = unOp OpNegate
-    abs x = ifB (x > 0) x (negate x)
-    signum x = ifB (x > 0) 1 (ifB (x < 0) (-1) 0)
-    fromInteger = literal . fromInteger
+    (/) = binOp OpDiv
+    (%) = binOp OpMod
+
+instance Arith Int where
