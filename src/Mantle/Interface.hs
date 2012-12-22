@@ -66,6 +66,11 @@ make compF = do
     return $ expose ifc
 
 
+instance Interface () where
+    data Ifc d () = UnitIfc
+    newIfcCircuit = return UnitIfc
+    expose UnitIfc = UnitIfc
+
 instance (Interface a, Interface b) => Interface (a,b) where
     data Ifc d (a,b) = TupleIfc (Ifc d a) (Ifc d b)
     newIfcCircuit = do
