@@ -30,9 +30,6 @@ instance Bits a => Readable (Wire a) a where
 instance Bits a => Readable (Reg a) a where
     read = Var . regVar
 
-literal :: Bits a => a -> Logic a
-literal x = Logic $ Lit (unpack x)
-
 
 class Bits a => Bindable b a | b -> a where
     (=:) :: (Readable r a, MonadCircuit c) => b -> r -> c ()
@@ -42,8 +39,6 @@ instance Bits a => Bindable (Wire a) a where
         tell $ (wires.at w ?~ Comb size (read e)) mempty
         where size = bitSize (undefined :: a)
 
-unOp :: UnaryOperator -> Logic a -> Logic a
-unOp op x = Logic $ UnOp op (expr x)
 class Bits a => Writable w a | w -> a where
     (<=:) :: (Readable r a) => w -> r -> Statement
 
@@ -51,8 +46,6 @@ instance Bits a => Writable (Reg a) a where
     (Reg r :: Reg a) <=: e = do
         tell $ (writes.at r ?~ read e) mempty
 
-binOp :: BinaryOperator -> Logic a -> Logic a -> Logic b
-binOp op x y = Logic $ BinOp (expr x) op (expr y)
 newtype Signal a = Signal Expr
 
 instance Bits a => Readable (Signal a) a where
@@ -83,6 +76,17 @@ instance IfB (Logic a) where
 instance EqB (Logic a) where
     (==*) = binOp OpEqual
     (/=*) = binOp OpNotEq
+literal :: Bits a => a -> Signal a
+literal x = Signal $ Lit (unpack x)
+
+unOp :: Readable r a => UnaryOperator -> r -> Signal a
+unOp op x = Signal $ UnOp op (read x)
+
+binOp :: (Readable r1 a, Readable r2 a) =>
+    BinaryOperator -> r1 -> r2 -> Signal b
+binOp op x y =
+    Signal $ BinOp (read x) op (read y)
+
 
 instance OrdB (Logic a) where
     (<*) = binOp OpLT
