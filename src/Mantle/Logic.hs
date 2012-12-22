@@ -41,6 +41,12 @@ instance Bits a => Bindable (Wire a) a where
 
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
+class Bits a => Writable w a | w -> a where
+    (<=:) :: (Readable r a) => w -> r -> Statement
+
+instance Bits a => Writable (Reg a) a where
+    (Reg r :: Reg a) <=: e = do
+        tell $ (writes.at r ?~ read e) mempty
 
 binOp :: BinaryOperator -> Logic a -> Logic a -> Logic b
 binOp op x y = Logic $ BinOp (expr x) op (expr y)
