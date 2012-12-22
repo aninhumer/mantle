@@ -4,6 +4,7 @@ module Mantle.RTL where
 
 import Control.Lens.TH
 import Data.Vector.Bit
+import Data.Monoid
 import qualified Data.Sequence as S
 import qualified Data.Map as M
 import qualified Data.Set as Set
@@ -65,6 +66,18 @@ data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
 
 data UnaryOperator = OpNegate | OpNot -- ...
     deriving (Eq,Ord)
+
+
+instance Monoid RTL where
+    mempty = RTL M.empty M.empty M.empty
+    mappend (RTL xw xr xb) (RTL yw yr yb) =
+        RTL (xw <> yw) (xr <> yr) (M.unionWith (<>) xb yb)
+
+instance Monoid Block where
+    mempty = Block M.empty M.empty
+    mappend (Block xc xu) (Block yc yu) =
+        Block (M.unionWith (<>) xc yc) (xu <> yu)
+
 
 $( makeLenses ''RTL )
 $( makeLenses ''Block )
