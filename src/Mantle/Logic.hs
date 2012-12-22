@@ -16,8 +16,6 @@ import Mantle.Circuit
 
 newtype Logic a = Logic { expr :: Expr }
 
-always :: Trigger
-always = empty
 
 comb :: Bits a => Logic a -> Circuit (Logic a)
 comb (Logic e) = do
