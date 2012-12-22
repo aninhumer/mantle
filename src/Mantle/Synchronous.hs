@@ -61,13 +61,12 @@ onReset stmt = do
     (clk,rst) <- ask
     onTrigger (syncTrigger clk rst) $ iff (not rst) stmt
 
-(<=:) :: Reg a -> Logic a -> Synchronous ()
-(Reg r) <=: (Logic e) = do
-    tell $ Sync [] [(r,e)]
+(=~) :: (Writable w a, Readable r a) => w -> r -> Synchronous ()
+w =~ e = onSync (w <=: e)
 
-reg :: Bits a => a -> Synchronous (Reg a)
+reg :: Bits a => Constant a -> Synchronous (Reg a)
 reg x = do
-    r @ (Reg n) <- newReg
-    tell $ Sync [(n,unpack x)] []
+    r <- newReg
+    onReset (r <=: x)
     return r
 
