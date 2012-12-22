@@ -27,31 +27,33 @@ class Monad m => MonadCircuit m where
 instance MonadCircuit Circuit where
     liftCircuit = id
 
+circuit :: MonadCircuit c => StateT Int (Writer RTL) a -> c a
+circuit = liftCircuit . Circuit
 
 makeCircuit :: Circuit a -> RTL
-makeCircuit c = execState c emptyRTL
+makeCircuit (Circuit c) = execWriter $ evalStateT c 0
 
-newVariable :: MonadCircuit c => Variable -> c (Ref)
-newVariable v = do
-    count <- uses vars M.size
-    let newRef = Ref count
-    vars.at newRef ?= v
-    return newRef
+newRef :: MonadCircuit c => c (Ref)
+newRef = circuit $ do
+    ref <- get
+    put $ ref + 1
+    return $ Ref ref
 
 newtype Wire a = Wire { wireVar :: Ref }
 
-newWire :: forall a c. (MonadCircuit c, Bits a) => c (Wire a)
+newWire :: MonadCircuit c => c (Wire a)
 newWire = do
-    n <- newVariable $ Variable WireVar size
-    return $ Wire n
-    where size = bitSize (undefined :: a)
+    ref <- newRef
+    return $ Wire ref
 
 newtype Reg a = Reg { regVar :: Ref }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
 newReg = do
-    n <- newVariable $ Variable RegVar size
-    return $ Reg n
+    ref <- newRef
+    circuit $ do
+        tell $ (regs.at ref ?~ size) mempty
+        return $ Reg ref
     where size = bitSize (undefined :: a)
 
 addStmt :: MonadCircuit c => Trigger -> Statement -> c ()
