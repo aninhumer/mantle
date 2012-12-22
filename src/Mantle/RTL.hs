@@ -19,10 +19,6 @@ data RTL = RTL {
 newtype Ref = Ref Int
     deriving (Eq, Ord)
 
--- Temporary replacement for names
-instance Show Ref where
-    show (Ref i) = "a" ++ show i
-
 data Comb = Comb {
     _width :: Width,
     _comb  :: Expr
