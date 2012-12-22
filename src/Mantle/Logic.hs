@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -30,7 +31,13 @@ literal :: Bits a => a -> Logic a
 literal x = Logic $ Lit (unpack x)
 
 
+class Bits a => Bindable b a | b -> a where
+    (=:) :: (Readable r a, MonadCircuit c) => b -> r -> c ()
 
+instance Bits a => Bindable (Wire a) a where
+    (Wire w :: Wire a) =: e = circuit $ do
+        tell $ (wires.at w ?~ Comb size (read e)) mempty
+        where size = bitSize (undefined :: a)
 
 unOp :: UnaryOperator -> Logic a -> Logic a
 unOp op x = Logic $ UnOp op (expr x)
