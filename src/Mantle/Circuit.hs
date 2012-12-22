@@ -19,8 +19,6 @@ type Circuit = State RTL
 
 type MonadCircuit = MonadState RTL
 
-emptyRTL :: RTL
-emptyRTL = RTL M.empty M.empty
 
 makeCircuit :: Circuit a -> RTL
 makeCircuit c = execState c emptyRTL
