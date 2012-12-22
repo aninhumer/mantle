@@ -1,12 +1,14 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Mantle.Circuit where
 
 import Prelude hiding (length, mapM_)
 
 import Control.Monad.State hiding (mapM_)
+import Control.Monad.Writer
 import Control.Lens
 import Data.Foldable
 import Data.Bits
@@ -15,9 +17,15 @@ import qualified Data.Sequence as S
 
 import Mantle.RTL
 
-type Circuit = State RTL
+newtype Circuit a = Circuit
+    { unCircuit :: StateT Int (Writer RTL) a }
+    deriving (Monad)
 
-type MonadCircuit = MonadState RTL
+class Monad m => MonadCircuit m where
+    liftCircuit :: Circuit a -> m a
+
+instance MonadCircuit Circuit where
+    liftCircuit = id
 
 
 makeCircuit :: Circuit a -> RTL
