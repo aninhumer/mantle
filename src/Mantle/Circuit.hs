@@ -1,16 +1,11 @@
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Mantle.Circuit where
 
-import Prelude hiding (length, mapM_)
-
-import Control.Monad.State hiding (mapM_)
+import Control.Monad.State
 import Control.Monad.Writer
 import Control.Lens
-import Data.Foldable
 import Data.Bits
 import qualified Data.Map as M
 import qualified Data.Sequence as S
