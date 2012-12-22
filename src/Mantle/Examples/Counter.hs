@@ -1,10 +1,15 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RebindableSyntax #-}
+
+import Mantle.Prelude
 
 import Mantle.Logic
 import Mantle.Synchronous
 
-counter :: Synchronous (Logic Int)
-counter = do
+counter :: SyncComp (Output Int) ()
+counter out = do
     val <- reg 0
-    val <=: (rd val + 1)
-    return (rd val)
+    onSync $ do
+        val <=: (val + 1)
+    out =: val
 
