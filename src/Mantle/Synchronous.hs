@@ -1,4 +1,5 @@
 {-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Mantle.Synchronous where
@@ -7,6 +8,7 @@ import Mantle.Prelude
 
 import Control.Monad.Writer
 import Control.Arrow (second)
+import Control.Monad.Reader
 import qualified Data.Map as M
 import qualified Data.Sequence as S
 import qualified Data.Set as Set
@@ -29,17 +31,12 @@ instance Readable Reset Bool where
 
 type ClockReset = (Clock,Reset)
 
+type Synchronous = ReaderT ClockReset Circuit
 
-data Sync = Sync {
-    syncInitials :: [(Ref,BitVector)],
-    syncUpdates  :: [(Ref,Expr)]
-}
 
-instance Monoid Sync where
-    mempty  = Sync [] []
-    mappend (Sync xi xu) (Sync yi yu) = Sync (xi ++ yi) (xu ++ yu)
+instance MonadCircuit Synchronous where
+    liftCircuit = lift
 
-type Synchronous = WriterT Sync Circuit
 
 onSync :: Clock -> Reset -> Trigger
 onSync (Clock c) (Reset r) = Set.fromList [PosEdge c, NegEdge r]
