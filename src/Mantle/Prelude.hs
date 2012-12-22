@@ -1,7 +1,6 @@
 
 module Mantle.Prelude (
     module Prelude,
-    module Data.Boolean.Overload
 ) where
 
 import Prelude hiding (
@@ -9,6 +8,7 @@ import Prelude hiding (
     (==), (/=),
     (<), (>), (<=), (>=),
     min, max,
-    (/) )
+    (+), (-), (*), (/),
+    fromInteger,
+    read)
 
-import Data.Boolean.Overload
