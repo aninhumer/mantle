@@ -1,5 +1,9 @@
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Mantle.Synchronous where
+
+import Mantle.Prelude
 
 import Control.Monad.Writer
 import Control.Arrow (second)
@@ -13,9 +17,18 @@ import Mantle.RTL
 import Mantle.Circuit
 import Mantle.Logic
 
-newtype Clock = Clock { clockVar :: Ref }
+newtype Clock = Clock (Wire Bool)
 
-newtype Reset = Reset { resetVar :: Ref }
+instance Readable Clock Bool where
+    read (Clock w) = read w
+
+newtype Reset = Reset (Wire Bool)
+
+instance Readable Reset Bool where
+    read (Reset w) = read w
+
+type ClockReset = (Clock,Reset)
+
 
 data Sync = Sync {
     syncInitials :: [(Ref,BitVector)],
