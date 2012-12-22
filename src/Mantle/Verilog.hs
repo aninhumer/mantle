@@ -14,54 +14,73 @@ import Mantle.RTL
 dshow :: Show a => a -> Doc
 dshow = text.pack.show
 
+genMap :: (a -> b -> Doc) -> M.Map a b -> Doc
+genMap f m = vcat $ map (uncurry f) $ M.assocs m
+
 genRTL :: RTL -> Doc
-genRTL (RTL vs bs) =
-    genDecls vs <> line <$> genActions bs
+genRTL (RTL ws rs bs) =
+    genWires ws <$> genRegs rs <$> genBlocks bs
 
-genDecls :: M.Map Ref Variable -> Doc
-genDecls vs = vcat $ map (uncurry genDecl) $ M.assocs vs
-
-genDecl :: Ref -> Variable -> Doc
-genDecl n (Variable vt w) =
-    keyword vt <+> sizeDef w <+> dshow n <> ";"
+genWires :: M.Map Ref Comb -> Doc
+genWires ws =
+    genMap genWire ws <$>
+    "always begin" <$>
+        indent 4 (genMap genComb ws) <$>
+    "end"
   where
-    keyword WireVar = "wire"
-    keyword RegVar  = "reg"
-    sizeDef 1 = ""
-    sizeDef n = "[" <> int (n-1) <> ":0]"
+    genWire r (Comb w _) =
+        "wire" <+> genWidth w <+> genRef r <> ";"
+    genComb r (Comb _ e) =
+        genRef r <+> "=" <+> genExpr e <> ";"
 
-genActions :: M.Map Trigger Block -> Doc
-genActions as = vcat $ map (uncurry genAlways) $ M.assocs as
+genRegs :: M.Map Ref Width -> Doc
+genRegs =
+    genMap genReg
+  where
+    genReg r w = "reg" <+> genWidth w <+> genRef r <> ";"
 
-genAlways :: Trigger -> Block -> Doc
-genAlways t b
-    | Set.null t = "always" <+> genBlock b
-    | otherwise  = "always @" <> genTrigger t <+> genBlock b
+genWidth 1 = ""
+genWidth n = "[" <> int (n-1) <> ":0]"
 
-genTrigger :: Trigger -> Doc
-genTrigger = encloseSep "(" ")" "," . map genEdge . toList
+genRef :: Ref -> Doc
+genRef (Ref r) = "a" <> dshow r
 
-genEdge :: Edge -> Doc
-genEdge (PosEdge v) = "posedge" <+> dshow v
-genEdge (NegEdge v) = "negedge" <+> dshow v
-genEdge (EitherEdge v) = dshow v
+genBlocks :: M.Map Trigger Block -> Doc
+genBlocks =
+    genMap genTrigBlock
+  where
+    genTrigBlock t b =
+        "always @" <> genTrigger t <+> genBlock b
+    genTrigger =
+        encloseSep "(" ")" "," . map genEdge . toList
+    genEdge v = case v of
+        PosEdge p -> "posedge" <+> genRef p
+        NegEdge n -> "negedge" <+> genRef n
+        EitherEdge e -> genRef e
 
 genBlock :: Block -> Doc
-genBlock blk = "begin" <$> indent 4 stmts <$> "end"
+genBlock (Block cs ws) =
+    "begin" <$>
+        indent 4 (genConds cs <$> genWrites ws) <$>
+    "end"
   where
-    stmts = vcat $ toList $ fmap genStmt blk
 
-genStmt :: Statement -> Doc
-genStmt (Cond c t e) =
-    "if" <+> parens (genExpr c) <+> genBlock t <+> "else" <+> genBlock e
-genStmt (BlockingAssign n e) =
-    dshow n <+> "=" <+> genExpr e <> ";"
-genStmt (AsyncAssign n e) =
-    dshow n <+> "<=" <+> genExpr e <> ";"
+genConds :: M.Map Expr Block -> Doc
+genConds =
+    genMap genCond
+  where
+    genCond c b =
+        "if (" <> genExpr c <> ")" <+> genBlock b
+
+genWrites :: Update -> Doc
+genWrites =
+    genMap genWrite
+  where
+    genWrite r e = genRef r <+> "<=" <+> genExpr e <> ";"
 
 genExpr :: Expr -> Doc
 genExpr (Lit bv) = genLiteral bv
-genExpr (Var n) = dshow n
+genExpr (Var r) = genRef r
 genExpr (BinOp x op y) =
     parens $ genExpr x <+> genBinOp op <+> genExpr y
 genExpr (UnOp op x) =
