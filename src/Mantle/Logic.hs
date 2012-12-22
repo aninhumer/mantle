@@ -118,3 +118,9 @@ class Arith a where
     (%) = binOp OpMod
 
 instance Arith Int where
+
+comb :: (Bits a, Readable r a) => r -> Circuit (Signal a)
+comb x = do
+    w <- newWire
+    w =: x
+    return $ readSignal w
