@@ -31,6 +31,7 @@ instance Bits a => Readable (Reg a) a where
     read = Var . regVar
 
 
+infix 1 =:
 class Bits a => Bindable b a | b -> a where
     (=:) :: (Readable r a, MonadCircuit c) => b -> r -> c ()
 
@@ -39,6 +40,7 @@ instance Bits a => Bindable (Wire a) a where
         tell $ (wires.at w ?~ Comb size (read e)) mempty
         where size = bitSize (undefined :: a)
 
+infix 1 <=:
 class Bits a => Writable w a | w -> a where
     (<=:) :: (Readable r a) => w -> r -> Statement
 
