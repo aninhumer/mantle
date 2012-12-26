@@ -34,6 +34,7 @@ module Data.Vector.Bit (
 where
 
 import Data.Bits
+import Data.Maybe (fromMaybe)
 import qualified Data.Vector.Unboxed as V
 
 -- | A 'BitVector' is a little-endian 'V.Vector' of
@@ -102,9 +103,7 @@ instance Bits BitVector where
   bitSize     = V.length
   isSigned    = const False
   bit i       = V.replicate i False `V.snoc` True
-  testBit v i = case (v V.!? i) of
-    Just x  -> x
-    Nothing -> False
+  testBit v i = fromMaybe False (v V.!? i)
   popCount v  = V.length $ V.filter id v
 
 -- | Converts an instance of 'Bits' to a 'BitVector'. 
@@ -117,7 +116,7 @@ unpack w = trimLeading $ V.generate (bitSize w) (testBit w)
 
 -- | Converts a 'BitVector' to an instance of 'Bits'.
 pack :: (Bits a) => BitVector -> a
-pack v = V.ifoldl' set zero v
+pack = V.ifoldl' set zero
   where
     set w i True = w `setBit` i
     set w _ _    = w

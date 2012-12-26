@@ -29,7 +29,7 @@ circuit = liftCircuit . Circuit
 makeCircuit :: Circuit a -> RTL
 makeCircuit (Circuit c) = execWriter $ evalStateT c 0
 
-newRef :: MonadCircuit c => c (Ref)
+newRef :: MonadCircuit c => c Ref
 newRef = circuit $ do
     ref <- get
     put $ ref + 1
