@@ -1,3 +1,5 @@
+*.o
+*.hi
 *.swp
 *.sublime*
 src/dist*
