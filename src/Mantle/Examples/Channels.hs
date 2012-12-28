@@ -49,3 +49,16 @@ instance Bits a => Interface (OutChan a) where
     expose (OutChan v h) =
         OutChan (expose v) (expose h)
 
+data Pipe a b
+
+instance (Bits a, Bits b) => Interface (Pipe a b) where
+    data Ifc d (Pipe a b) = Pipe {
+        pipeIn :: Ifc d (InChan a),
+        pipeOut:: Ifc d (OutChan a)
+    }
+    newIfcCircuit = do
+        pi <- newIfc
+        po <- newIfc
+        return $ Pipe pi po
+    expose (Pipe pi po) =
+        Pipe (expose pi) (expose po)
