@@ -1,6 +1,8 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RebindableSyntax #-}
 
+module Mantle.Examples.Counter where
+
 import Mantle.Prelude
 
 import Mantle.Logic
