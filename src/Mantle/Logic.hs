@@ -21,46 +21,46 @@ import Mantle.RTL
 import Mantle.Circuit
 
 
-class Bits a => Readable r a | r -> a where
-    read :: r -> Expr
+class Readable r a | r -> a where
+    read :: r -> Signal a
 
 instance Bits a => Readable (Wire a) a where
-    read = Var . wireVar
+    read = Signal . Var . wireVar
 
 instance Bits a => Readable (Reg a) a where
-    read = Var . regVar
+    read = Signal . Var . regVar
 
 
 infix 1 =:
-class Bits a => Bindable b a | b -> a where
+class Bindable b a | b -> a where
     (=:) :: (Readable r a, MonadCircuit c) => b -> r -> c ()
 
 instance Bits a => Bindable (Wire a) a where
     (Wire w :: Wire a) =: e = circuit $ do
-        tell $ (wires.at w ?~ Comb size (read e)) mempty
+        tell $ (wires.at w ?~ Comb size (readExpr e)) mempty
         where size = bitSize (undefined :: a)
 
 infix 1 <=:
-class Bits a => Writable w a | w -> a where
+class Writable w a | w -> a where
     (<=:) :: (Readable r a) => w -> r -> Statement
 
 instance Bits a => Writable (Reg a) a where
     (Reg r :: Reg a) <=: e = do
-        tell $ (writes.at r ?~ read e) mempty
+        tell $ (writes.at r ?~ readExpr e) mempty
 
-newtype Signal a = Signal Expr
+newtype Signal a = Signal { unSignal :: Expr }
 
 instance Bits a => Readable (Signal a) a where
-    read (Signal e) = e
+    read = id
 
-readSignal :: Readable r a => r -> Signal a
-readSignal = Signal . read
+readExpr :: Readable r a => r -> Expr
+readExpr = unSignal . read
 
 
 newtype Constant a = Constant a
 
 instance Bits a => Readable (Constant a) a where
-    read (Constant x) = Lit $ unpack x
+    read (Constant x) = Signal $ Lit $ unpack x
 
 fromInteger :: Integral a => Integer -> Constant a
 fromInteger = Constant . P.fromIntegral
@@ -70,12 +70,12 @@ literal :: Bits a => a -> Signal a
 literal x = Signal $ Lit (unpack x)
 
 unOp :: Readable r a => UnaryOperator -> r -> Signal a
-unOp op x = Signal $ UnOp op (read x)
+unOp op x = Signal $ UnOp op (readExpr x)
 
 binOp :: (Readable r1 a, Readable r2 a) =>
     BinaryOperator -> r1 -> r2 -> Signal b
 binOp op x y =
-    Signal $ BinOp (read x) op (read y)
+    Signal $ BinOp (readExpr x) op (readExpr y)
 
 
 true, false :: Signal Bool
@@ -93,7 +93,7 @@ not = unOp OpNot
 ifThenElse :: (Readable r1 Bool, Readable r2 a, Readable r3 a) =>
     r1 -> r2 -> r3 -> Signal a
 ifThenElse c x y =
-    Signal $ CondE (read c) (read x) (read y)
+    Signal $ CondE (readExpr c) (readExpr x) (readExpr y)
 
 (==), (!=) :: (Readable r1 a, Readable r2 a, Eq a) =>
     r1 -> r2 -> Signal Bool
@@ -124,10 +124,10 @@ comb :: (Bits a, Readable r a) => r -> Circuit (Signal a)
 comb x = do
     w <- newWire
     w =: x
-    return $ readSignal w
+    return $ read w
 
 iff :: Readable c Bool => c -> Statement -> Statement
 iff cond stmt = do
     let (_,blk) = runWriter stmt
-    let c = read cond
+    let c = readExpr cond
     tell $ (conds.at c ?~ blk) mempty
