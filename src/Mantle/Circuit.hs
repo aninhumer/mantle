@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Mantle.Circuit where
@@ -35,22 +36,24 @@ newRef = circuit $ do
     put $ ref + 1
     return $ Ref ref
 
+newVar :: forall v a c. (Bits a, MonadCircuit c) =>
+    Simple Lens RTL (M.Map Ref Width) -> (Ref -> v a) -> c (v a)
+newVar lens wrap = do
+    ref <- newRef
+    circuit $ do
+        tell $ (lens.at ref ?~ size) mempty
+        return $ wrap ref
+    where size = bitSize (undefined :: a)
+
 newtype Wire a = Wire { wireVar :: Ref }
 
-newWire :: MonadCircuit c => c (Wire a)
-newWire = do
-    ref <- newRef
-    return $ Wire ref
+newWire :: forall a c. (Bits a, MonadCircuit c) => c (Wire a)
+newWire = newVar wires Wire
 
 newtype Reg a = Reg { regVar :: Ref }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
-newReg = do
-    ref <- newRef
-    circuit $ do
-        tell $ (regs.at ref ?~ size) mempty
-        return $ Reg ref
-    where size = bitSize (undefined :: a)
+newReg = newVar regs Reg
 
 type Statement = StmtM ()
 

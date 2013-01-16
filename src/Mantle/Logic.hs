@@ -37,8 +37,7 @@ class Bindable b a | b -> a where
 
 instance Bits a => Bindable (Wire a) a where
     (Wire w :: Wire a) =: e = circuit $ do
-        tell $ (wires.at w ?~ Comb size (readExpr e)) mempty
-        where size = bitSize (undefined :: a)
+        tell $ (combs.at w ?~ readExpr e) mempty
 
 infix 1 <=:
 class Writable w a | w -> a where

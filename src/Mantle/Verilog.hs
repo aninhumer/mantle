@@ -18,19 +18,24 @@ genMap :: (a -> b -> Doc) -> M.Map a b -> Doc
 genMap f m = vcat $ map (uncurry f) $ M.assocs m
 
 genRTL :: RTL -> Doc
-genRTL (RTL ws rs bs) =
-    genWires ws <$> genRegs rs <$> genBlocks bs
+genRTL (RTL ws rs cs bs) =
+    genWires ws <$>
+    genRegs rs <$>
+    genCombs cs <$>
+    genBlocks bs
 
-genWires :: M.Map Ref Comb -> Doc
-genWires ws =
-    genMap genWire ws <$>
+genWires :: M.Map Ref Width -> Doc
+genWires = genMap genWire
+  where
+    genWire r w =
+        "wire" <+> genWidth w <+> genRef r <> ";"
+
+genCombs cs =
     "always begin" <$>
-        indent 4 (genMap genComb ws) <$>
+        indent 4 (genMap genComb cs) <$>
     "end"
   where
-    genWire r (Comb w _) =
-        "wire" <+> genWidth w <+> genRef r <> ";"
-    genComb r (Comb _ e) =
+    genComb r e =
         genRef r <+> "=" <+> genExpr e <> ";"
 
 genRegs :: M.Map Ref Width -> Doc
