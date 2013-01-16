@@ -11,24 +11,45 @@ import Text.PrettyPrint.Leijen.Text
 
 import Mantle.RTL
 
-dshow :: Show a => a -> Doc
-dshow = text.pack.show
+dshow :: String -> Doc
+dshow = text.pack
 
 genMap :: (a -> b -> Doc) -> M.Map a b -> Doc
 genMap f m = vcat $ map (uncurry f) $ M.assocs m
 
+genModule :: String -> RTL -> Doc
+genModule name rtl@(RTL is os _ _ _ _) =
+    "module" <+> dshow name <+> tupled ioNames <> ";" <$>
+        indent 4 (genRTL rtl) <$>
+    "endmodule"
+  where
+    ioNames = map genRef $ (M.keys is) ++ (M.keys os)
+
+
 genRTL :: RTL -> Doc
-genRTL (RTL _ _ ws rs cs bs) =
+genRTL (RTL is os ws rs cs bs) =
+    genInputs is <$>
+    genOutputs os <$>
     genWires ws <$>
     genRegs rs <$>
     genCombs cs <$>
     genBlocks bs
 
+genVar :: Doc -> Ref -> Width -> Doc
+genVar d r w =
+    d <+> genWidth w <+> genRef r <> ";"
+
+genInputs :: M.Map Ref Width -> Doc
+genInputs = genMap (genVar "input")
+
+genOutputs :: M.Map Ref Width -> Doc
+genOutputs = genMap (genVar "output")
+
 genWires :: M.Map Ref Width -> Doc
-genWires = genMap genWire
-  where
-    genWire r w =
-        "wire" <+> genWidth w <+> genRef r <> ";"
+genWires = genMap (genVar "wire")
+
+genRegs :: M.Map Ref Width -> Doc
+genRegs = genMap (genVar "reg")
 
 genCombs cs =
     "always begin" <$>
@@ -38,17 +59,11 @@ genCombs cs =
     genComb r e =
         genRef r <+> "=" <+> genExpr e <> ";"
 
-genRegs :: M.Map Ref Width -> Doc
-genRegs =
-    genMap genReg
-  where
-    genReg r w = "reg" <+> genWidth w <+> genRef r <> ";"
-
 genWidth 1 = ""
 genWidth n = "[" <> int (n-1) <> ":0]"
 
 genRef :: Ref -> Doc
-genRef (Ref r) = "a" <> dshow r
+genRef (Ref r) = "a" <> dshow (show r)
 
 genBlocks :: M.Map Trigger Block -> Doc
 genBlocks =
