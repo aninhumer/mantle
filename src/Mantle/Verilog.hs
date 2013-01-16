@@ -18,7 +18,7 @@ genMap :: (a -> b -> Doc) -> M.Map a b -> Doc
 genMap f m = vcat $ map (uncurry f) $ M.assocs m
 
 genRTL :: RTL -> Doc
-genRTL (RTL ws rs cs bs) =
+genRTL (RTL _ _ ws rs cs bs) =
     genWires ws <$>
     genRegs rs <$>
     genCombs cs <$>

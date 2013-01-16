@@ -11,6 +11,8 @@ import qualified Data.Set as Set
 
 
 data RTL = RTL {
+    _inputs  :: M.Map Ref Width,
+    _outputs :: M.Map Ref Width,
     _wires   :: M.Map Ref Width,
     _regs    :: M.Map Ref Width,
     _combs   :: M.Map Ref Expr,
@@ -61,10 +63,10 @@ data UnaryOperator = OpNegate | OpNot -- ...
 
 
 instance Monoid RTL where
-    mempty = RTL mempty mempty mempty mempty
-    mappend (RTL xw xr xc xb) (RTL yw yr yc yb) =
-        RTL (xw <> yw) (xr <> yr) (xc <> yc)
-            (M.unionWith (<>) xb yb)
+    mempty = RTL mempty mempty mempty mempty mempty mempty
+    mappend (RTL xi xo xw xr xc xb) (RTL yi yo yw yr yc yb) =
+        RTL (xi <> yi) (xo <> yo) (xw <> yw) (xr <> yr)
+            (xc <> yc) (M.unionWith (<>) xb yb)
 
 instance Monoid Block where
     mempty = Block M.empty M.empty

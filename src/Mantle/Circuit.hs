@@ -45,6 +45,18 @@ newVar lens wrap = do
         return $ wrap ref
     where size = bitSize (undefined :: a)
 
+newtype ExtInput a = ExtInput Ref
+
+newExtInput :: forall a c.
+    (Bits a, MonadCircuit c) => c (ExtInput a)
+newExtInput = newVar inputs ExtInput
+
+newtype ExtOutput a = ExtOutput Ref
+
+newExtOutput :: forall a c.
+    (Bits a, MonadCircuit c) => c (ExtOutput a)
+newExtOutput = newVar inputs ExtOutput
+
 newtype Wire a = Wire { wireVar :: Ref }
 
 newWire :: forall a c. (Bits a, MonadCircuit c) => c (Wire a)
