@@ -73,6 +73,10 @@ instance Source (Stream a) a where
 instance Source (Outer (Pipe a b)) b where
     srcChan (Pipe _ o) = o
 
+instance Source (Inner (InChan a)) a where
+    srcChan (InChan (InputWire v) (OutputWire r) (InputWire e)) =
+        OutChan (OutputWire v) (OutputWire e) (InputWire r)
+
 
 class Sink s a | s -> a where
     snkChan :: s -> Outer (InChan a)
@@ -82,6 +86,10 @@ instance Sink (Outer (InChan a)) a where
 
 instance Sink (Outer (Pipe a b)) a where
     snkChan (Pipe i _) = i
+
+instance Sink (Inner (OutChan a)) a where
+    snkChan (OutChan (OutputWire v) (OutputWire r) (InputWire e)) =
+        InChan (InputWire v) (OutputWire e) (InputWire r)
 
 
 (>>>) :: (Bits a, MonadCircuit c, Source x a, Sink y a) =>
