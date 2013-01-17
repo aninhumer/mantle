@@ -37,9 +37,9 @@ type SyncComp ifc = Inner ifc -> Synchronous ()
 instance MonadCircuit Synchronous where
     liftCircuit = lift
 
-makeSync :: Interface ifc =>
-    ClockReset -> SyncComp ifc -> Circuit (Outer ifc)
-makeSync cr syncF = (`runReaderT` cr) $ do
+makeSync :: (Interface ifc, MonadCircuit c) =>
+    ClockReset -> SyncComp ifc -> c (Outer ifc)
+makeSync cr syncF = liftCircuit $ (`runReaderT` cr) $ do
     ifc <- newIfc
     syncF ifc
     return $ expose ifc

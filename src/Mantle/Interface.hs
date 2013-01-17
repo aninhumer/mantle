@@ -58,10 +58,11 @@ instance Bits a => Bindable (Outer (Input a)) a where
 
 type Component ifc = Inner ifc -> Circuit ()
 
-make :: Interface ifc => Component ifc -> Circuit (Outer ifc)
+make :: (Interface ifc, MonadCircuit c) =>
+    Component ifc -> c (Outer ifc)
 make compF = do
     ifc <- newIfc
-    compF ifc
+    liftCircuit $ compF ifc
     return $ expose ifc
 
 
