@@ -1,4 +1,6 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE TypeFamilies #-}
 
 module Mantle.Examples.Channels where
@@ -8,6 +10,8 @@ import Mantle.Prelude
 import Data.Bits
 
 import Mantle.Interface
+import Mantle.Circuit
+import Mantle.Logic
 
 
 data InChan a
@@ -57,3 +61,32 @@ instance (Bits a, Bits b) => Interface (Pipe a b) where
         return $ Pipe pi po
     expose (Pipe pi po) =
         Pipe (expose pi) (expose po)
+
+type Stream a = Outer (OutChan a)
+
+class Source s a | s -> a where
+    srcChan :: s -> Stream a
+
+instance Source (Stream a) a where
+    srcChan = id
+
+instance Source (Outer (Pipe a b)) b where
+    srcChan (Pipe _ out) = out
+
+-- Left biased stream merge
+(>><) :: (Bits a, MonadCircuit c, Source x a, Source y a) =>
+    x -> y -> c (Stream a)
+x >>< y = do
+    let (OutChan xv xr xe) = srcChan x
+    let (OutChan yv yr ye) = srcChan y
+    out@(OutChan zv zr ze) <- newIfc
+    zr =: xr || yr
+    xe =: ze && xr
+    ye =: ze && not xr
+    zv =: if xr then xv else yv
+    return $ expose out
+
+-- Right biased stream merge
+(><<) :: (Bits a, MonadCircuit c, Source x a, Source y a) =>
+    x -> y -> c (Stream a)
+(><<) = flip (>><)
