@@ -71,7 +71,32 @@ instance Source (Stream a) a where
     srcChan = id
 
 instance Source (Outer (Pipe a b)) b where
-    srcChan (Pipe _ out) = out
+    srcChan (Pipe _ o) = o
+
+
+class Sink s a | s -> a where
+    snkChan :: s -> Outer (InChan a)
+
+instance Sink (Outer (InChan a)) a where
+    snkChan = id
+
+instance Sink (Outer (Pipe a b)) a where
+    snkChan (Pipe i _) = i
+
+
+(>>>) :: (Bits a, MonadCircuit c, Source x a, Sink y a) =>
+    x -> y -> c ()
+x >>> y = do
+    let (OutChan xv xr xe) = srcChan x
+    let (InChan  yv yr ye) = snkChan y
+    yv =: xv
+    ye =: xr
+    xe =: yr
+
+(<<<) :: (Bits a, MonadCircuit c, Source x a, Sink y a) =>
+    y -> x -> c ()
+(<<<) = flip (>>>)
+
 
 -- Left biased stream merge
 (>><) :: (Bits a, MonadCircuit c, Source x a, Source y a) =>
