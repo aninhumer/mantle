@@ -5,9 +5,11 @@ module Mantle.Examples.FIFO where
 import Mantle.Prelude
 
 import Data.Bits
+import Control.Monad.Reader
 
 import Mantle.Logic
 import Mantle.Synchronous
+import Mantle.Interface
 
 import Mantle.Examples.Channels
 
@@ -29,3 +31,12 @@ fifo (Pipe inchan outchan) = do
             full <=: true
         iff (full && oenable outchan) $ do
             full <=: false
+
+fifoChain :: (Integral a, Bits a) => SyncComp (Pipe a a)
+fifoChain (Pipe inchan outchan) = do
+    clkrst <- ask
+    fifoA <- makeSync clkrst fifo
+    fifoB <- makeSync clkrst fifo
+    inchan >>> fifoA
+    fifoA >>> fifoB
+    fifoB >>> outchan
