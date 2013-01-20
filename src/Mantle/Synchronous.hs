@@ -32,17 +32,16 @@ type ClockReset = (Clock,Reset)
 
 type Synchronous = ReaderT ClockReset Circuit
 
-type SyncComp ifc = Inner ifc -> Synchronous ()
+type SyncComp ifc = FlipIfc ifc -> Synchronous ()
 
 instance MonadCircuit Synchronous where
     liftCircuit = lift
 
 makeSync :: (Interface ifc, MonadCircuit c) =>
-    ClockReset -> SyncComp ifc -> c (Outer ifc)
-makeSync cr syncF = liftCircuit $ (`runReaderT` cr) $ do
-    ifc <- newIfc
-    syncF ifc
-    return $ expose ifc
+    ClockReset ->
+    (FlipIfc ifc -> Synchronous ()) ->
+    (FlipIfc ifc -> Circuit ())
+makeSync cr syncF ifc = runReaderT (syncF ifc) cr
 
 syncTrigger :: Clock -> Reset -> Trigger
 syncTrigger (Clock c) (Reset r) =

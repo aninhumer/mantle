@@ -1,80 +1,79 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE NoImplicitPrelude #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Mantle.Interface where
 
-import Mantle.Prelude
-
 import Data.Bits
 
+import Mantle.RTL
 import Mantle.Circuit
-import Mantle.Logic
 
 
-data FaceK = InnerT | OuterT
+data FaceK = Inner | Outer
 
-type Inner ifc = Ifc InnerT ifc
-type Outer ifc = Ifc OuterT ifc
+type family   Flip (d :: FaceK) :: FaceK
+type instance Flip Inner = Outer
+type instance Flip Outer = Inner
+
+
+type family FlipIfc x
 
 class Interface ifc where
-    data Ifc (d :: FaceK) ifc
-    newIfcCircuit :: Circuit (Inner ifc)
-    expose :: Inner ifc -> Outer ifc
+    newIfc :: (MonadCircuit c) => c (ifc, FlipIfc ifc)
 
-newIfc :: (Interface ifc, MonadCircuit c) => c (Inner ifc)
-newIfc = liftCircuit newIfcCircuit
 
-data Input a
-data Output a
+type instance FlipIfc (ifc (d :: FaceK)) = ifc (Flip d)
 
-instance Bits a => Interface (Input a) where
-    data Ifc d (Input a) = InputWire (Wire a)
-    newIfcCircuit = do
+
+data family   Signal a (d :: FaceK)
+data instance Signal a Inner = Input { unInput :: Ref }
+data instance Signal a Outer = Output { unOutput :: Expr }
+
+type Input  a = Signal a Inner
+type Output a = Signal a Outer
+
+
+class IsDir d where
+    toSignal :: Wire a -> Signal a d
+
+instance IsDir Inner where
+    toSignal (Wire w) = Input w
+
+instance IsDir Outer where
+    toSignal (Wire w) = Output (Var w)
+
+type Direction d =
+    (IsDir d, IsDir (Flip d), d ~ Flip (Flip d))
+
+
+instance (Direction d, Bits a) => Interface (Signal a d) where
+    newIfc = do
         w <- newWire
-        return $ InputWire w
-    expose (InputWire w) = InputWire w
+        return (toSignal w, toSignal w)
 
-instance Bits a => Interface (Output a) where
-    data Ifc d (Output a) = OutputWire (Wire a)
-    newIfcCircuit = do
-        w <- newWire
-        return $ OutputWire w
-    expose (OutputWire w) = OutputWire w
 
-instance Bits a => Readable (Outer (Output a)) a where
-    read (OutputWire w) = read w
-
-instance Bits a => Bindable (Inner (Output a)) a where
-    (OutputWire w) =: e = w =: e
-
-instance Bits a => Readable (Inner (Input a)) a where
-    read (InputWire w) = read w
-
-instance Bits a => Bindable (Outer (Input a)) a where
-    (InputWire w) =: e = w =: e
-
-type Component ifc = Inner ifc -> Circuit ()
+type Component c ifc = FlipIfc ifc -> c ()
 
 make :: (Interface ifc, MonadCircuit c) =>
-    Component ifc -> c (Outer ifc)
+    Component c ifc -> c ifc
 make compF = do
-    ifc <- newIfc
-    liftCircuit $ compF ifc
-    return $ expose ifc
+    (outer,inner) <- newIfc
+    compF inner
+    return outer
 
+
+type instance FlipIfc () = ()
 
 instance Interface () where
-    data Ifc d () = UnitIfc
-    newIfcCircuit = return UnitIfc
-    expose UnitIfc = UnitIfc
+    newIfc = return ((),())
+
+
+type instance FlipIfc (a,b) = (FlipIfc a, FlipIfc b)
 
 instance (Interface a, Interface b) => Interface (a,b) where
-    data Ifc d (a,b) = TupleIfc (Ifc d a) (Ifc d b)
-    newIfcCircuit = do
-        x <- newIfc
-        y <- newIfc
-        return $ TupleIfc x y
-    expose (TupleIfc x y) = TupleIfc (expose x) (expose y)
+    newIfc = do
+        (ax,ay) <- newIfc
+        (bx,by) <- newIfc
+        return ((ax,bx),(ay,by))
