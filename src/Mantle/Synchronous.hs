@@ -57,7 +57,7 @@ onReset stmt = do
     (clk,rst) <- ask
     onTrigger (syncTrigger clk rst) $ iff (not rst) stmt
 
-(=~) :: (Writable w a, Readable r a) => w -> r -> Synchronous ()
+(=~) :: Readable r a => Reg a -> r -> Synchronous ()
 w =~ e = onSync (w <=: e)
 
 reg :: Bits a => Constant a -> Synchronous (Reg a)

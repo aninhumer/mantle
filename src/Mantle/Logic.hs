@@ -32,24 +32,14 @@ instance Bits a => Readable (Reg a) a where
 
 
 infix 1 =:
-class Bindable b a | b -> a where
-    (=:) :: (Readable r a, MonadCircuit c) => b -> r -> c ()
-
-instance Bits a => Bindable (Wire a) a where
-    (Wire w :: Wire a) =: e = circuit $ do
-        tell $ (combs.at w ?~ readExpr e) mempty
-
-instance Bits a => Bindable (Input a) a where
-    (Input w) =: e = circuit $ do
-        tell $ (combs.at w ?~ readExpr e) mempty
+(=:) :: (Readable r a, MonadCircuit c) => Input a -> r -> c ()
+(Input w) =: e = circuit $ do
+    tell $ (combs.at w ?~ readExpr e) mempty
 
 infix 1 <=:
-class Writable w a | w -> a where
-    (<=:) :: (Readable r a) => w -> r -> Statement
-
-instance Bits a => Writable (Reg a) a where
-    (Reg r :: Reg a) <=: e = do
-        tell $ (writes.at r ?~ readExpr e) mempty
+(<=:) :: (Readable r a) => Reg a -> r -> Statement
+(Reg r :: Reg a) <=: e = do
+    tell $ (writes.at r ?~ readExpr e) mempty
 
 instance Bits a => Readable (Output a) a where
     read = id
@@ -123,9 +113,9 @@ instance Arith Int where
 
 comb :: (Bits a, Readable r a) => r -> Circuit (Output a)
 comb x = do
-    w <- newWire
-    w =: x
-    return $ read w
+    (i,o) <- newIfc
+    i =: x
+    return o
 
 iff :: Readable c Bool => c -> Statement -> Statement
 iff cond stmt = do
