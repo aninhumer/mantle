@@ -18,17 +18,7 @@ import Mantle.Circuit
 import Mantle.Logic
 import Mantle.Interface
 
-newtype Clock = Clock (Wire Bool)
-
-instance Readable Clock Bool where
-    read (Clock w) = read w
-
-newtype Reset = Reset (Wire Bool)
-
-instance Readable Reset Bool where
-    read (Reset w) = read w
-
-type ClockReset = (Clock,Reset)
+type ClockReset = (Ref, Ref)
 
 type Synchronous = ReaderT ClockReset Circuit
 
@@ -43,26 +33,26 @@ makeSync :: (Interface ifc, MonadCircuit c) =>
     (FlipIfc ifc -> Circuit ())
 makeSync cr syncF ifc = runReaderT (syncF ifc) cr
 
-syncTrigger :: Clock -> Reset -> Trigger
-syncTrigger (Clock c) (Reset r) =
-    posedge c <> negedge r
+syncTrigger :: ClockReset -> Trigger
+syncTrigger (c, r) =
+    posedge (Wire c) <> negedge (Wire r)
 
 onSync :: Statement -> Synchronous ()
 onSync stmt = do
-    (clk,rst) <- ask
-    onTrigger (syncTrigger clk rst) $ iff clk stmt
+    cr@(clk,rst) <- ask
+    onTrigger (syncTrigger cr) $ iff (Output (Var clk)) stmt
 
 onReset :: Statement -> Synchronous ()
 onReset stmt = do
-    (clk,rst) <- ask
-    onTrigger (syncTrigger clk rst) $ iff (not rst) stmt
+    cr@(clk,rst) <- ask
+    onTrigger (syncTrigger cr) $ iff (not (Output (Var rst))) stmt
 
-(=~) :: Readable r a => Reg a -> r -> Synchronous ()
+(=~) :: Reg a -> Output a -> Synchronous ()
 w =~ e = onSync (w <=: e)
 
-reg :: Bits a => Constant a -> Synchronous (Reg a)
+reg :: Bits a => a -> Synchronous (Reg a)
 reg x = do
     r <- newReg
-    onReset (r <=: x)
+    onReset (r <=: literal x)
     return r
 

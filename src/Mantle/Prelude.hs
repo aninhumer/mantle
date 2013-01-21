@@ -7,8 +7,5 @@ import Prelude hiding (
     (&&), (||), not,
     (==), (/=),
     (<), (>), (<=), (>=),
-    min, max,
-    (+), (-), (*), (/),
-    fromInteger,
-    read)
+    min, max)
 

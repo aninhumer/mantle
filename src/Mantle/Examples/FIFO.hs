@@ -20,17 +20,17 @@ fifo (Pipe inchan outchan) = do
 
     -- Need to implement regU to avoid Integral constraint
     val  <- reg 0
-    full <- reg $ Constant False
+    full <- reg False
 
-    valid outchan =: full
-    value outchan =: val
-    ready inchan  =: not full
+    valid outchan =: rd full
+    value outchan =: rd val
+    ready inchan  =: not (rd full)
 
     onSync $ do
-        iff (not full && valid inchan) $ do
+        iff (not (rd full) && valid inchan) $ do
             val  <=: value inchan
             full <=: true
-        iff (full && ready outchan) $ do
+        iff (rd full && ready outchan) $ do
             full <=: false
 
 fifoChain :: forall a. (Integral a, Bits a) => SyncComp (FIFO a)

@@ -14,6 +14,6 @@ counter :: SyncComp (Output Int)
 counter out = do
     val <- reg 0
     onSync $ do
-        val <=: val + 1
-    out =: val
+        val <=: rd val + 1
+    out =: rd val
 
