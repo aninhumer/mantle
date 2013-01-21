@@ -33,6 +33,12 @@ infix 1 <=:
 rd :: Reg a -> Output a
 rd (Reg r) = Output (Var r)
 
+extern :: forall a c. (Bits a, MonadCircuit c) =>
+    Output a -> c ()
+extern x = do
+    (ExtOutput o :: ExtOutput a) <- newExtOutput
+    Input o =: x
+
 
 literal :: Bits a => a -> Output a
 literal x = Output $ Lit (unpack x)

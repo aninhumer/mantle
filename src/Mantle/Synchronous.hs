@@ -47,6 +47,12 @@ makeSync :: (Interface ifc, MonadCircuit c) =>
     (FlipIfc ifc -> Circuit ())
 makeSync cr syncF ifc = runReaderT (syncF ifc) cr
 
+buildSync :: Synchronous a -> RTL
+buildSync sync = buildCircuit $ do
+    c <- newClock
+    r <- newReset
+    runReaderT sync (c,r)
+
 syncTrigger :: ClockReset -> Trigger
 syncTrigger (Clock c, Reset r) =
     posedge c <> negedge r
