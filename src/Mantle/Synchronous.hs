@@ -48,7 +48,7 @@ makeSync :: (Interface ifc, MonadCircuit c) =>
 makeSync cr syncF ifc = runReaderT (syncF ifc) cr
 
 syncTrigger :: ClockReset -> Trigger
-syncTrigger (Clock (ExtInput c), Reset (ExtInput r)) =
+syncTrigger (Clock c, Reset r) =
     posedge c <> negedge r
 
 onSync :: Statement -> Synchronous ()

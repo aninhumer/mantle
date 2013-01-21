@@ -27,8 +27,8 @@ instance MonadCircuit Circuit where
 circuit :: MonadCircuit c => StateT Int (Writer RTL) a -> c a
 circuit = liftCircuit . Circuit
 
-makeCircuit :: Circuit a -> RTL
-makeCircuit (Circuit c) = execWriter $ evalStateT c 0
+buildCircuit :: Circuit a -> RTL
+buildCircuit (Circuit c) = execWriter $ evalStateT c 0
 
 newRef :: MonadCircuit c => c Ref
 newRef = circuit $ do
@@ -55,7 +55,7 @@ newtype ExtOutput a = ExtOutput Ref
 
 newExtOutput :: forall a c.
     (Bits a, MonadCircuit c) => c (ExtOutput a)
-newExtOutput = newVar inputs ExtOutput
+newExtOutput = newVar outputs ExtOutput
 
 newtype Wire a = Wire { wireVar :: Ref }
 
@@ -76,8 +76,8 @@ onTrigger trig stmt = do
     let (_,newBlock) = runWriter stmt
     circuit $ tell $ (blocks.at trig ?~ newBlock) mempty
 
-posedge :: Wire a -> Trigger
-posedge (Wire w) = Set.singleton $ PosEdge w
+posedge :: ExtInput a -> Trigger
+posedge (ExtInput x) = Set.singleton $ PosEdge x
 
-negedge :: Wire a -> Trigger
-negedge (Wire w) = Set.singleton $ NegEdge w
+negedge :: ExtInput a -> Trigger
+negedge (ExtInput x) = Set.singleton $ NegEdge x
