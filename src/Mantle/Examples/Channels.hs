@@ -1,5 +1,7 @@
+{-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ConstraintKinds #-}
@@ -7,6 +9,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Mantle.Examples.Channels where
+
+import Mantle.Prelude
 
 import Data.Bits
 
@@ -66,12 +70,38 @@ instance Sink (Pipe a b) a where
     snkChan = inchan
 
 
+chanMap :: (Output a -> Output b) -> OutChan a -> OutChan b
+chanMap f (Channel v r e) = Channel (f v) r e
+
+chanZip :: MonadCircuit mc =>
+    (Output a -> Output b -> Output c) ->
+    OutChan a -> OutChan b -> mc (OutChan c)
+chanZip f (Channel xv xr xe) (Channel yv yr ye) = do
+    (ei,eo) <- newIfc
+    xe =: ei
+    ye =: ei
+    return $ Channel (f xv yv) (xr && yr) eo
+
+
 (>>>) :: forall src snk a c.
     (Bits a, Source src a, Sink snk a, MonadCircuit c)
     => src -> snk -> c ()
 src >>> snk = do
-    let (Channel xv xr xe) = srcChan src :: (OutChan a)
-    let (Channel yv yr ye) = snkChan snk :: (InChan a)
+    let (Channel xv xr xe) = srcChan src :: OutChan a
+    let (Channel yv yr ye) = snkChan snk :: InChan a
     yv =: xv
     yr =: xr
     xe =: ye
+
+(<<<) :: forall snk src a c.
+    (Bits a, Sink snk a, Source src a, MonadCircuit c)
+    => snk -> src -> c ()
+(<<<) = flip (>>>)
+
+
+(>+<), (>-<), (>*<) ::
+    (Num (Output a), MonadCircuit c) =>
+    OutChan a -> OutChan a -> c (OutChan a)
+(>+<) = chanZip (+)
+(>-<) = chanZip (-)
+(>*<) = chanZip (*)
