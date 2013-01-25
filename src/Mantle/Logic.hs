@@ -36,8 +36,8 @@ rd (Reg r) = Output (Var r)
 extern :: forall a c. (Bits a, MonadCircuit c) =>
     Output a -> c ()
 extern x = do
-    (ExtOutput o :: ExtOutput a) <- newExtOutput
-    Input o =: x
+    o <- extOutput
+    o =: x
 
 
 literal :: Bits a => a -> Output a

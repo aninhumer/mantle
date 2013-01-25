@@ -34,6 +34,11 @@ instance (Direction d, Bits a) => Interface (Channel a d) where
         (rx,ry) <- newIfc
         (ex,ey) <- newIfc
         return (Channel vx rx ex, Channel vy ry ey)
+    extIfc = do
+        v <- extIfc
+        r <- extIfc
+        e <- extIfc
+        return $ Channel v r e
 
 data PipeIfc a b d = Pipe {
     inchan  :: Channel a (Flip d),
@@ -48,6 +53,10 @@ instance (Direction d, Bits a, Bits b)
         (ix,iy) <- newIfc
         (ox,oy) <- newIfc
         return (Pipe ix ox, Pipe iy oy)
+    extIfc = do
+        i <- extIfc
+        o <- extIfc
+        return $ Pipe i o
 
 
 class Source ifc a | ifc -> a where
