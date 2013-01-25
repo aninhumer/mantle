@@ -93,7 +93,7 @@ chanZip :: MonadCircuit mc =>
     (Output a -> Output b -> Output c) ->
     OutChan a -> OutChan b -> mc (OutChan c)
 chanZip f (Channel xv xr xe) (Channel yv yr ye) = do
-    (ei,eo) <- newIfc
+    (eo,ei) <- newIfc
     xe =: ei
     ye =: ei
     return $ Channel (f xv yv) (xr && yr) eo

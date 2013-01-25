@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE RebindableSyntax #-}
 
@@ -19,7 +20,7 @@ counter out = do
 
 counterExt :: Synchronous ()
 counterExt = do
-    c <- make counter
+    c :: Output Int <- make counter
     extern c
 
 counterCode = genModule "counter" $ buildSync counterExt

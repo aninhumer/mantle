@@ -27,7 +27,7 @@ type family FlipIfc x
 class Interface ifc where
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
     extIfc :: MonadCircuit c => c (ifc)
-    (=:)   :: MonadCircuit c => ifc -> FlipIfc ifc -> c ()
+    (=:)   :: MonadCircuit c => FlipIfc ifc -> ifc -> c ()
 
 type instance FlipIfc (ifc (d :: FaceK)) = ifc (Flip d)
 

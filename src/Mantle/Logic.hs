@@ -28,10 +28,10 @@ infix 1 <=:
 rd :: Reg a -> Output a
 rd (Reg r) = Output (Var r)
 
-extern :: forall a c. (Bits a, MonadCircuit c) =>
-    Output a -> c ()
+extern :: (Interface ifc, Interface (FlipIfc ifc), MonadCircuit c) =>
+    ifc -> c ()
 extern x = do
-    o <- extOutput
+    o <- extIfc
     o =: x
 
 
