@@ -57,8 +57,8 @@ syncTrigger :: ClockReset -> Trigger
 syncTrigger (Clock c, Reset r) =
     posedge c <> negedge r
 
-onSync :: Statement -> Synchronous ()
-onSync stmt = do
+onClock :: Statement -> Synchronous ()
+onClock stmt = do
     cr@(Clock (ExtInput c), _) <- ask
     onTrigger (syncTrigger cr) $ iff (Output (Var c)) stmt
 
@@ -68,7 +68,7 @@ onReset stmt = do
     onTrigger (syncTrigger cr) $ iff (not (Output (Var r))) stmt
 
 (=~) :: Reg a -> Output a -> Synchronous ()
-w =~ e = onSync (w <=: e)
+w =~ e = onClock (w <=: e)
 
 reg :: Bits a => a -> Synchronous (Reg a)
 reg x = do

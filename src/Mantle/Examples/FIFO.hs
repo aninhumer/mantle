@@ -26,7 +26,7 @@ fifo (Pipe inchan outchan) = do
     value outchan =: rd val
     ready inchan  =: not (rd full)
 
-    onSync $ do
+    onClock $ do
         iff (not (rd full) && valid inchan) $ do
             val  <=: value inchan
             full <=: true
