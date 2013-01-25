@@ -20,11 +20,6 @@ import Mantle.Circuit
 import Mantle.Interface
 
 
-infix 1 =:
-(=:) :: MonadCircuit c => Input a -> Output a -> c ()
-(Input w) =: e = circuit $ do
-    tell $ (combs.at w ?~ unOutput e) mempty
-
 infix 1 <=:
 (<=:) :: Reg a -> Output a -> Statement
 (Reg r :: Reg a) <=: e = do

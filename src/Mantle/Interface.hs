@@ -7,6 +7,8 @@
 
 module Mantle.Interface where
 
+import Control.Lens
+import Control.Monad.Writer
 import Data.Bits
 
 import Mantle.RTL
@@ -25,6 +27,7 @@ type family FlipIfc x
 class Interface ifc where
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
     extIfc :: MonadCircuit c => c (ifc)
+    (=:)   :: MonadCircuit c => ifc -> FlipIfc ifc -> c ()
 
 type instance FlipIfc (ifc (d :: FaceK)) = ifc (Flip d)
 
@@ -40,6 +43,7 @@ type Output a = Signal a Outer
 class IsDir d where
     toSignal :: Wire a -> Signal a d
     extSignal :: (Bits a, MonadCircuit c) => c (Signal a d)
+    bindSignal :: MonadCircuit c => Signal a d -> Signal a (Flip d) -> c ()
 
 extOutput :: forall a c. (Bits a, MonadCircuit c) => c (Input a)
 extOutput = do
@@ -49,6 +53,8 @@ extOutput = do
 instance IsDir Inner where
     toSignal (Wire w) = Input w
     extSignal = extOutput
+    bindSignal (Input x) (Output y) = circuit $ do
+        tell $ (combs.at x ?~ y) mempty
 
 extInput :: forall a c. (Bits a, MonadCircuit c) => c (Output a)
 extInput = do
@@ -58,6 +64,8 @@ extInput = do
 instance IsDir Outer where
     toSignal (Wire w) = Output (Var w)
     extSignal = extInput
+    bindSignal (Output y) (Input x) = circuit $ do
+        tell $ (combs.at x ?~ y) mempty
 
 type Direction d =
     (IsDir d, IsDir (Flip d), d ~ Flip (Flip d))
@@ -68,6 +76,7 @@ instance (Direction d, Bits a) => Interface (Signal a d) where
         w <- newWire
         return (toSignal w, toSignal w)
     extIfc = extSignal
+    (=:) = bindSignal
 
 
 type Component c ifc = FlipIfc ifc -> c ()
@@ -85,6 +94,7 @@ type instance FlipIfc () = ()
 instance Interface () where
     newIfc = return ((),())
     extIfc = return ()
+    _ =: _ = return ()
 
 
 type instance FlipIfc (a,b) = (FlipIfc a, FlipIfc b)
@@ -98,3 +108,6 @@ instance (Interface a, Interface b) => Interface (a,b) where
         a <- extIfc
         b <- extIfc
         return (a,b)
+    (x1,y1) =: (x2,y2) = do
+        x1 =: x2
+        y1 =: y2
