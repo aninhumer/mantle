@@ -1,4 +1,6 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Mantle.Verilog where
 
@@ -10,6 +12,8 @@ import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
 
 import Mantle.RTL
+import Mantle.Circuit
+import Mantle.Interface
 
 dshow :: String -> Doc
 dshow = text.pack
@@ -25,6 +29,10 @@ genModule name rtl@(RTL is os _ _ _ _) =
   where
     ioNames = map genRef $ (M.keys is) ++ (M.keys os)
 
+genComponent :: forall ifc. Interface (FlipIfc ifc) =>
+    String -> Component Circuit ifc -> Doc
+genComponent name comp =
+    genModule name (buildCircuit (makeExtern comp :: Circuit (VoidIfc ifc)))
 
 genRTL :: RTL -> Doc
 genRTL (RTL is os ws rs cs bs) =

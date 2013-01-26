@@ -23,6 +23,7 @@ type instance Flip Outer = Inner
 
 
 type family FlipIfc x
+data VoidIfc ifc = VoidIfc
 
 class Interface ifc where
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
@@ -87,6 +88,13 @@ make compF = do
     (outer,inner) <- newIfc
     compF inner
     return outer
+
+makeExtern :: forall ifc c. (Interface (FlipIfc ifc), MonadCircuit c) =>
+    Component c ifc -> c (VoidIfc ifc)
+makeExtern compF = do
+    ext <- extIfc
+    compF ext
+    return VoidIfc
 
 
 type instance FlipIfc () = ()
