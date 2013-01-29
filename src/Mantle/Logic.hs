@@ -9,13 +9,11 @@ module Mantle.Logic where
 import Mantle.Prelude
 import qualified Prelude as P
 
-import Data.Bits
-import Data.Bits.Bool
-import Data.Vector.Bit
 import Control.Monad.Writer
 import Control.Lens
 
 import Mantle.RTL
+import Mantle.Bits
 import Mantle.Circuit
 import Mantle.Interface
 
@@ -38,7 +36,7 @@ extern x = do
 
 
 literal :: Bits a => a -> Output a
-literal x = Output $ Lit (unpack x)
+literal = Output . repExpr
 
 unOp :: UnaryOperator -> Output a -> Output a
 unOp op x = Output $ UnOp op (unOutput x)

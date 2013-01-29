@@ -3,7 +3,6 @@
 module Mantle.RTL where
 
 import Control.Lens.TH
-import Data.Vector.Bit
 import Data.Monoid
 import qualified Data.Sequence as S
 import qualified Data.Map as M
@@ -11,10 +10,10 @@ import qualified Data.Set as Set
 
 
 data RTL = RTL {
-    _inputs  :: M.Map Ref Width,
-    _outputs :: M.Map Ref Width,
-    _wires   :: M.Map Ref Width,
-    _regs    :: M.Map Ref Width,
+    _inputs  :: M.Map Ref VType,
+    _outputs :: M.Map Ref VType,
+    _wires   :: M.Map Ref VType,
+    _regs    :: M.Map Ref VType,
     _combs   :: M.Map Ref Expr,
     _blocks  :: M.Map Trigger Block
 }
@@ -26,7 +25,8 @@ data IRef = IRef Ref Ref
           | NRef Ref
           deriving (Eq,Ord)
 
-type Width = Int
+data VType = BitType Int
+           | VecType Int VType
 
 type Trigger = Set.Set Edge
 
@@ -42,7 +42,7 @@ data Block = Block {
 
 type Update = M.Map IRef Expr
 
-data Expr = Lit BitVector
+data Expr = Lit Value
           | Var Ref
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
@@ -53,6 +53,9 @@ data Expr = Lit BitVector
           | Concat [Expr]
           deriving (Eq,Ord)
 
+data Value = Dec Integer
+           | Undef
+           deriving (Eq,Ord)
 
 data BinaryOperator = OpAdd | OpSub | OpMul | OpDiv | OpMod
                     | OpAnd | OpOr

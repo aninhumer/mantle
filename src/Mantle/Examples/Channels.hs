@@ -12,8 +12,7 @@ module Mantle.Examples.Channels where
 
 import Mantle.Prelude
 
-import Data.Bits
-
+import Mantle.Bits
 import Mantle.Interface
 import Mantle.Circuit
 import Mantle.Logic

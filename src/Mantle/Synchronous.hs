@@ -10,10 +10,10 @@ import Control.Monad.Reader
 import qualified Data.Map as M
 import qualified Data.Sequence as S
 import qualified Data.Set as Set
-import Data.Bits
 import Data.Monoid
 
 import Mantle.RTL
+import Mantle.Bits
 import Mantle.Circuit
 import Mantle.Logic
 import Mantle.Interface

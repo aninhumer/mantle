@@ -7,12 +7,13 @@ module Mantle.Circuit where
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Lens
-import Data.Bits
 import qualified Data.Map as M
 import qualified Data.Sequence as S
 import qualified Data.Set as Set
 
 import Mantle.RTL
+import Mantle.Bits
+
 
 newtype Circuit a = Circuit
     { unCircuit :: StateT Int (Writer RTL) a }
@@ -37,13 +38,13 @@ newRef = circuit $ do
     return $ Ref ref
 
 newVar :: forall v a c. (Bits a, MonadCircuit c) =>
-    Simple Lens RTL (M.Map Ref Width) -> (Ref -> v a) -> c (v a)
+    Simple Lens RTL (M.Map Ref VType) -> (Ref -> v a) -> c (v a)
 newVar lens wrap = do
     ref <- newRef
     circuit $ do
         tell $ (lens.at ref ?~ size) mempty
         return $ wrap ref
-    where size = bitSize (undefined :: a)
+    where size = repType (undefined :: a)
 
 newtype ExtInput a = ExtInput Ref
 

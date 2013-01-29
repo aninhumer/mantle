@@ -6,7 +6,6 @@ module Mantle.Verilog where
 
 import Data.Foldable
 import qualified Data.Map as M
-import qualified Data.Vector.Unboxed as V
 import qualified Data.Set as Set
 import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
@@ -43,20 +42,20 @@ genRTL (RTL is os ws rs cs bs) =
     genCombs cs <$>
     genBlocks bs
 
-genVar :: Doc -> Ref -> Width -> Doc
+genVar :: Doc -> Ref -> VType -> Doc
 genVar d r w =
-    d <+> genWidth w <+> genRef r <> ";"
+    d <+> genRepr w <+> genRef r <> ";"
 
-genInputs :: M.Map Ref Width -> Doc
+genInputs :: M.Map Ref VType -> Doc
 genInputs = genMap (genVar "input")
 
-genOutputs :: M.Map Ref Width -> Doc
+genOutputs :: M.Map Ref VType -> Doc
 genOutputs = genMap (genVar "output")
 
-genWires :: M.Map Ref Width -> Doc
+genWires :: M.Map Ref VType -> Doc
 genWires = genMap (genVar "wire")
 
-genRegs :: M.Map Ref Width -> Doc
+genRegs :: M.Map Ref VType -> Doc
 genRegs = genMap (genVar "reg")
 
 genCombs cs =
@@ -67,8 +66,9 @@ genCombs cs =
     genComb r e =
         genRef r <+> "=" <+> genExpr e <> ";"
 
-genWidth 1 = ""
-genWidth n = "[" <> int (n-1) <> ":0]"
+genRepr :: VType -> Doc
+genRepr (BitType n) = "[" <> int (n-1) <> ":0]"
+genRepr (VecType n r) = "[" <> int (n-1) <> ":0]" <> genRepr r
 
 genRef :: Ref -> Doc
 genRef (Ref r) = "a" <> dshow (show r)
@@ -124,14 +124,9 @@ genExpr (BitSel n i) =
 genExpr (Concat es) =
     encloseSep "{" "}" "," $ map genExpr es
 
-genLiteral :: V.Vector Bool -> Doc
-genLiteral bv
-    | V.length bv == 0 = "'b0"
-    | otherwise        = "'b" <> bits
-  where
-    bits = foldMap genBit $ V.toList $ V.reverse bv
-    genBit True  = "1" 
-    genBit False = "0" 
+genLiteral :: Value -> Doc
+genLiteral (Dec x) = "'d" <> integer x -- TODO: Need exact width here.
+genLiteral Undef = "'x"
 
 genBinOp :: BinaryOperator -> Doc
 genBinOp op = case op of

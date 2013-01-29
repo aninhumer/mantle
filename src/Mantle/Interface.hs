@@ -9,9 +9,9 @@ module Mantle.Interface where
 
 import Control.Lens
 import Control.Monad.Writer
-import Data.Bits
 
 import Mantle.RTL
+import Mantle.Bits
 import Mantle.Circuit
 
 

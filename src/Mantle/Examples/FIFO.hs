@@ -1,12 +1,12 @@
-{-# LANGUAGE RebindableSyntax #-}
+{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
 module Mantle.Examples.FIFO where
 
 import Mantle.Prelude
 
-import Data.Bits
 
+import Mantle.Bits
 import Mantle.Logic
 import Mantle.Synchronous
 import Mantle.Interface
@@ -32,6 +32,7 @@ fifo (Pipe inchan outchan) = do
             full <=: true
         iff (rd full && ready outchan) $ do
             full <=: false
+
 
 fifoChain :: forall a. (Integral a, Bits a) => SyncComp (FIFO a)
 fifoChain (Pipe inchan outchan) = do
