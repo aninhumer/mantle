@@ -87,6 +87,17 @@ instance Num (Output Int) where
         if x < 0 then (-1) else 0
     fromInteger = literal . fromInteger
 
+toWire :: forall a. Bits a => Output a -> Circuit (Wire a)
+toWire x = do
+    (Wire w :: Wire a) <- newWire
+    (Input w) =: x
+    return $ Wire w
+
+comb :: Bits a => Output a -> Circuit (Output a)
+comb x = do
+    (Wire w) <- toWire x
+    return $ Output (Var w)
+
 
 iff :: Output Bool -> Statement -> Statement
 iff cond stmt = do
