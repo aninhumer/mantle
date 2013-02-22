@@ -36,11 +36,11 @@ data Block = Block {
     _writes :: Update
 }
 
-type Update = M.Map IRef Expr
+type Update = M.Map RegRef Expr
 
-data IRef = IRef Ref Expr
-          | NRef Ref
-          deriving (Eq,Ord)
+data RegRef = IRef Ref Expr
+            | NRef Ref
+            deriving (Eq,Ord)
 
 data Expr = Lit Value
           | Var Ref

@@ -73,9 +73,9 @@ genRepr (VecType n r) = "[" <> int (n-1) <> ":0]" <> genRepr r
 genRef :: Ref -> Doc
 genRef (Ref r) = "a" <> dshow (show r)
 
-genIRef :: IRef -> Doc
-genIRef (NRef r) = genRef r
-genIRef (IRef r i) = genRef r <> brackets (genExpr i)
+genRegRef :: RegRef -> Doc
+genRegRef (NRef r) = genRef r
+genRegRef (IRef r i) = genRef r <> brackets (genExpr i)
 
 genBlocks :: M.Map Trigger Block -> Doc
 genBlocks =
@@ -108,7 +108,7 @@ genWrites :: Update -> Doc
 genWrites =
     genMap genWrite
   where
-    genWrite r e = genIRef r <+> "<=" <+> genExpr e <> ";"
+    genWrite r e = genRegRef r <+> "<=" <+> genExpr e <> ";"
 
 genExpr :: Expr -> Doc
 genExpr (Lit bv) = genLiteral bv
