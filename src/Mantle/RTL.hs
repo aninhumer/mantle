@@ -21,10 +21,6 @@ data RTL = RTL {
 newtype Ref = Ref Int
     deriving (Eq, Ord)
 
-data IRef = IRef Ref Ref
-          | NRef Ref
-          deriving (Eq,Ord)
-
 data VType = BitType Int
            | VecType Int VType
 
@@ -42,12 +38,16 @@ data Block = Block {
 
 type Update = M.Map IRef Expr
 
+data IRef = IRef Ref Expr
+          | NRef Ref
+          deriving (Eq,Ord)
+
 data Expr = Lit Value
           | Var Ref
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
           | CondE Expr Expr Expr
-          | VecIndex Ref Ref
+          | VecIndex Ref Expr
           | BitSel Ref Expr
           | BitRange Expr Int Int
           | Concat [Expr]

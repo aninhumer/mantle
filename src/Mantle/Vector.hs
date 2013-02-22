@@ -39,7 +39,5 @@ type Vector n a = VectorIfc n a Outer
 
 type Memory n a = Reg (Vec n a)
 
-index :: Bits i => Output i -> Memory n a -> Circuit (Reg a)
-index x (Reg (NRef m)) = do
-    (Wire w) <- toWire x
-    return $ Reg $ IRef w m
+index :: Bits i => Output i -> Memory n a -> Reg a
+index (Output e) (Reg (NRef m)) = Reg $ IRef m e
