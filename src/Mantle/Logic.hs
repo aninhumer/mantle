@@ -26,7 +26,7 @@ Reg r <=: e = do
 rd :: Reg a -> Output a
 rd (Reg ir) = Output $ case ir of
     NRef r   -> Var r
-    IRef r i -> VecIndex r i
+    IRef r i -> Index r i
 
 extern :: (Interface ifc, Interface (FlipIfc ifc), MonadCircuit c) =>
     ifc -> c ()

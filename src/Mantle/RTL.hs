@@ -47,8 +47,7 @@ data Expr = Lit Value
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
           | CondE Expr Expr Expr
-          | VecIndex Ref Expr
-          | BitSel Ref Expr
+          | Index Ref Expr
           | BitRange Expr Int Int
           | Concat [Expr]
           deriving (Eq,Ord)

@@ -119,7 +119,7 @@ genExpr (UnOp op x) =
     parens $ genUnOp op <> genExpr x
 genExpr (CondE c t e) =
     parens $ genExpr c <+> "?" <+> genExpr t <+> ":" <+> genExpr e
-genExpr (BitSel n i) =
+genExpr (Index n i) =
     genRef n <> brackets (genExpr i)
 genExpr (Concat es) =
     encloseSep "{" "}" "," $ map genExpr es
