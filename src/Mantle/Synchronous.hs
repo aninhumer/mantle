@@ -7,9 +7,6 @@ module Mantle.Synchronous where
 import Mantle.Prelude
 
 import Control.Monad.Reader
-import qualified Data.Map as M
-import qualified Data.Sequence as S
-import qualified Data.Set as Set
 import Data.Monoid
 
 import Mantle.RTL

@@ -15,7 +15,6 @@ import Data.Vector.Fixed.Boxed (Vec)
 import Mantle.Bits
 import Mantle.RTL
 import Mantle.Circuit
-import Mantle.Logic
 import Mantle.Interface
 
 type VectorIfc n a d = Vec n (Signal a d)

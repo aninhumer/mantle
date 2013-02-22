@@ -6,7 +6,6 @@ module Mantle.Verilog where
 
 import Data.Foldable
 import qualified Data.Map as M
-import qualified Data.Set as Set
 import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
 

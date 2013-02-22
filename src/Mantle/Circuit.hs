@@ -8,7 +8,6 @@ import Control.Monad.State
 import Control.Monad.Writer
 import Control.Lens
 import qualified Data.Map as M
-import qualified Data.Sequence as S
 import qualified Data.Set as Set
 
 import Mantle.RTL
