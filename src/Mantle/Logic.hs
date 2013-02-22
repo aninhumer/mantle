@@ -34,6 +34,8 @@ extern x = do
     o <- extIfc
     o =: x
 
+undef :: Output a
+undef = Output $ Lit Undef
 
 literal :: Bits a => a -> Output a
 literal = Output . repExpr

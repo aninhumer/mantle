@@ -15,11 +15,10 @@ import Mantle.Examples.Channels
 
 type FIFO a = Pipe a a
 
-fifo :: (Integral a, Bits a) => SyncComp (FIFO a)
+fifo :: Bits a => SyncComp (FIFO a)
 fifo (Pipe inchan outchan) = do
 
-    -- Need to implement regU to avoid Integral constraint
-    val  <- reg 0
+    val  <- regU
     full <- reg False
 
     valid outchan =: rd full

@@ -76,3 +76,8 @@ reg x = do
     onReset (r <=: literal x)
     return r
 
+regU :: Bits a => Synchronous (Reg a)
+regU = do
+    r <- newReg
+    onReset (r <=: undef)
+    return r
