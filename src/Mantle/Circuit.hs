@@ -62,10 +62,10 @@ newtype Wire a = Wire { wireVar :: Ref }
 newWire :: forall a c. (Bits a, MonadCircuit c) => c (Wire a)
 newWire = newVar wires Wire
 
-newtype Reg a = Reg { regVar :: Ref }
+newtype Reg a = Reg { regVar :: IRef }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
-newReg = newVar regs Reg
+newReg = newVar regs (Reg . NRef)
 
 type Statement = StmtM ()
 

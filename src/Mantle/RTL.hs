@@ -22,6 +22,10 @@ data RTL = RTL {
 newtype Ref = Ref Int
     deriving (Eq, Ord)
 
+data IRef = IRef Ref Ref
+          | NRef Ref
+          deriving (Eq,Ord)
+
 type Width = Int
 
 type Trigger = Set.Set Edge
@@ -36,13 +40,14 @@ data Block = Block {
     _writes :: Update
 }
 
-type Update = M.Map Ref Expr
+type Update = M.Map IRef Expr
 
 data Expr = Lit BitVector
           | Var Ref
           | BinOp Expr BinaryOperator Expr
           | UnOp UnaryOperator Expr
           | CondE Expr Expr Expr
+          | VecIndex Ref Ref
           | BitSel Ref Expr
           | BitRange Expr Int Int
           | Concat [Expr]

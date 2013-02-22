@@ -22,11 +22,13 @@ import Mantle.Interface
 
 infix 1 <=:
 (<=:) :: Reg a -> Output a -> Statement
-(Reg r :: Reg a) <=: e = do
+Reg r <=: e = do
     tell $ (writes.at r ?~ unOutput e) mempty
 
 rd :: Reg a -> Output a
-rd (Reg r) = Output (Var r)
+rd (Reg ir) = Output $ case ir of
+    NRef r   -> Var r
+    IRef i r -> VecIndex r i
 
 extern :: (Interface ifc, Interface (FlipIfc ifc), MonadCircuit c) =>
     ifc -> c ()

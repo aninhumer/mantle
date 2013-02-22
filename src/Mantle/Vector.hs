@@ -13,6 +13,7 @@ import qualified Data.Vector.Fixed as V
 import Data.Vector.Fixed.Boxed (Vec)
 import Data.Bits
 
+import Mantle.RTL
 import Mantle.Circuit
 import Mantle.Interface
 

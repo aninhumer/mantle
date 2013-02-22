@@ -73,6 +73,10 @@ genWidth n = "[" <> int (n-1) <> ":0]"
 genRef :: Ref -> Doc
 genRef (Ref r) = "a" <> dshow (show r)
 
+genIRef :: IRef -> Doc
+genIRef (NRef r) = genRef r
+genIRef (IRef i r) = genRef r <> brackets (genRef i)
+
 genBlocks :: M.Map Trigger Block -> Doc
 genBlocks =
     genMap genTrigBlock
@@ -104,7 +108,7 @@ genWrites :: Update -> Doc
 genWrites =
     genMap genWrite
   where
-    genWrite r e = genRef r <+> "<=" <+> genExpr e <> ";"
+    genWrite r e = genIRef r <+> "<=" <+> genExpr e <> ";"
 
 genExpr :: Expr -> Doc
 genExpr (Lit bv) = genLiteral bv
