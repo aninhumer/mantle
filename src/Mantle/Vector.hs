@@ -11,10 +11,11 @@ module Mantle.Vector where
 
 import qualified Data.Vector.Fixed as V
 import Data.Vector.Fixed.Boxed (Vec)
-import Data.Bits
 
+import Mantle.Bits
 import Mantle.RTL
 import Mantle.Circuit
+import Mantle.Logic
 import Mantle.Interface
 
 type VectorIfc n a d = Vec n (Signal a d)
@@ -34,3 +35,11 @@ instance (V.Arity n, Direction d, Bits a) => Interface (VectorIfc n a d) where
         return ()
 
 type Vector n a = VectorIfc n a Outer
+
+
+type Memory n a = Reg (Vec n a)
+
+index :: Bits i => Output i -> Memory n a -> Circuit (Reg a)
+index x (Reg (NRef m)) = do
+    (Wire w) <- toWire x
+    return $ Reg $ IRef w m
