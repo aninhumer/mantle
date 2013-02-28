@@ -99,6 +99,11 @@ chanZip f (Channel xv xr xe) (Channel yv yr ye) = do
     ye =: eo && xr
     return $ Channel (f xv yv) (xr && yr) ei
 
+chanGuard :: MonadCircuit mc =>
+    Output Bool -> OutChan a -> mc (OutChan a)
+chanGuard cond (Channel x r e) = do
+    ne <- inputMap (&& cond) e
+    return $ Channel x (r && cond) ne
 
 (>>>) :: forall src snk a c.
     (Bits a, Source src a, Sink snk a, MonadCircuit c)
