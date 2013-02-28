@@ -3,6 +3,7 @@
 {-# LANGUAGE RebindableSyntax #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Mantle.Logic where
 
@@ -17,6 +18,8 @@ import Mantle.Bits
 import Mantle.Circuit
 import Mantle.Interface
 
+
+type a :-> b = Output a -> Output b
 
 infix 1 <=:
 (<=:) :: Reg a -> Output a -> Statement
