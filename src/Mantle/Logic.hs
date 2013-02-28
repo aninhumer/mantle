@@ -37,6 +37,13 @@ extern x = do
     o <- extIfc
     o =: x
 
+inputMap :: (Bits a, Bits b, MonadCircuit mc) =>
+    (a :-> b) -> Input b -> mc (Input a)
+inputMap f x = do
+    (i,o) <- newIfc
+    x =: f o
+    return i
+
 undef :: Output a
 undef = Output $ Lit Undef
 
