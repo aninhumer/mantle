@@ -7,6 +7,7 @@
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Mantle.Examples.Channels where
 
@@ -84,8 +85,9 @@ instance Sink (InChan a) a where
 instance Sink (Pipe a b) a where
     snkChan = inchan
 
+type a :=> b = OutChan a -> OutChan b
 
-chanMap :: (Output a -> Output b) -> OutChan a -> OutChan b
+chanMap :: (a :-> b) -> (a :=> b)
 chanMap f (Channel v r e) = Channel (f v) r e
 
 chanZip :: MonadCircuit mc =>
