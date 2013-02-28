@@ -25,6 +25,7 @@ type instance Flip Outer = Inner
 type family FlipIfc x
 data VoidIfc ifc = VoidIfc
 
+infix 1 =:
 class Interface ifc where
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
     extIfc :: MonadCircuit c => c (ifc)
