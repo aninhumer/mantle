@@ -29,6 +29,7 @@ type InChan  a = Channel a Inner
 type OutChan a = Channel a Outer
 
 instance (Direction d, Bits a) => Interface (Channel a d) where
+    type FlipIfc (Channel a d) = Channel a (Flip d)
     newIfc = do
         (vx,vy) <- newIfc
         (rx,ry) <- newIfc
@@ -53,6 +54,7 @@ type Pipe a b = PipeIfc a b Outer
 
 instance (Direction d, Bits a, Bits b)
     => Interface (PipeIfc a b d) where
+    type FlipIfc (PipeIfc a b d) = PipeIfc a b (Flip d)
     newIfc = do
         (ix,iy) <- newIfc
         (ox,oy) <- newIfc

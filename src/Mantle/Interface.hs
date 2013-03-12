@@ -22,17 +22,14 @@ type instance Flip Inner = Outer
 type instance Flip Outer = Inner
 
 
-type family FlipIfc x
 data VoidIfc ifc = VoidIfc
 
 infix 1 =:
 class Interface ifc where
+    type FlipIfc ifc
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
     extIfc :: MonadCircuit c => c (ifc)
     (=:)   :: MonadCircuit c => FlipIfc ifc -> ifc -> c ()
-
-type instance FlipIfc (ifc (d :: FaceK)) = ifc (Flip d)
-
 
 data family   Signal a (d :: FaceK)
 data instance Signal a Inner = Input { unInput :: Ref }
@@ -74,6 +71,7 @@ type Direction d =
 
 
 instance (Direction d, Bits a) => Interface (Signal a d) where
+    type FlipIfc (Signal a d) = Signal a (Flip d)
     newIfc = do
         w <- newWire
         return (toSignal w, toSignal w)
@@ -98,17 +96,15 @@ makeExtern compF = do
     return VoidIfc
 
 
-type instance FlipIfc () = ()
-
 instance Interface () where
+    type FlipIfc () = ()
     newIfc = return ((),())
     extIfc = return ()
     _ =: _ = return ()
 
 
-type instance FlipIfc (a,b) = (FlipIfc a, FlipIfc b)
-
 instance (Interface a, Interface b) => Interface (a,b) where
+    type FlipIfc (a,b) = (FlipIfc a, FlipIfc b)
     newIfc = do
         (ax,ay) <- newIfc
         (bx,by) <- newIfc

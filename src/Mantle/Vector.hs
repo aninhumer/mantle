@@ -19,10 +19,9 @@ import Mantle.Interface
 
 type VectorIfc n a d = Vec n (Signal a d)
 
-type instance FlipIfc (VectorIfc n a d) =
-    VectorIfc n a (Flip d)
-
-instance (V.Arity n, Direction d, Bits a) => Interface (VectorIfc n a d) where
+instance (V.Arity n, Direction d, Bits a) =>
+    Interface (VectorIfc n a d) where
+    type FlipIfc (VectorIfc n a d) = VectorIfc n a (Flip d)
     newIfc = do
         pairs <- V.replicateM newIfc
         return (V.map fst pairs, V.map snd pairs)
