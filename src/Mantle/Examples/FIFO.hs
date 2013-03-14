@@ -23,13 +23,13 @@ fifo (Pipe inchan outchan) = do
 
     valid outchan =: rd full
     value outchan =: rd val
-    ready inchan  =: not (rd full)
+    enable inchan  =: not (rd full)
 
     onClock $ do
         iff (not (rd full) && valid inchan) $ do
             val  <=: value inchan
             full <=: true
-        iff (rd full && ready outchan) $ do
+        iff (rd full && enable outchan) $ do
             full <=: false
 
 

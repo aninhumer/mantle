@@ -118,7 +118,7 @@ instance Num (Output Int) where
 toWire :: forall a. Bits a => Output a -> Circuit (Wire a)
 toWire x = do
     (Wire w :: Wire a) <- newWire
-    (Input w) =: x
+    (refInput w) =: x
     return $ Wire w
 
 comb :: Bits a => Output a -> Circuit (Output a)

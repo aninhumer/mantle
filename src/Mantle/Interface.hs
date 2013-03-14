@@ -32,8 +32,10 @@ class Interface ifc where
     (=:)   :: MonadCircuit c => FlipIfc ifc -> ifc -> c ()
 
 data family   Signal a (d :: FaceK)
-data instance Signal a Inner = Input { unInput :: Ref }
-data instance Signal a Outer = Output { unOutput :: Expr }
+data instance Signal a Inner =
+    Input  { unInput :: Output a -> Circuit () }
+data instance Signal a Outer =
+    Output { unOutput :: Expr }
 
 type Input  a = Signal a Inner
 type Output a = Signal a Outer
@@ -44,16 +46,18 @@ class IsDir d where
     extSignal :: (Bits a, MonadCircuit c) => c (Signal a d)
     bindSignal :: MonadCircuit c => Signal a d -> Signal a (Flip d) -> c ()
 
+refInput :: Ref -> Input a
+refInput x = Input $ \(Output e) -> bindRef x e
+
 extOutput :: forall a c. (Bits a, MonadCircuit c) => c (Input a)
 extOutput = do
     (ExtOutput o :: ExtOutput a) <- newExtOutput
-    return $ Input o
+    return $ refInput o
 
 instance IsDir Inner where
-    toSignal (Wire w) = Input w
+    toSignal (Wire w) = refInput w
     extSignal = extOutput
-    bindSignal (Input x) (Output y) = circuit $ do
-        tell $ (combs.at x ?~ y) mempty
+    bindSignal (Input x) y = liftCircuit $ x y
 
 extInput :: forall a c. (Bits a, MonadCircuit c) => c (Output a)
 extInput = do
@@ -63,8 +67,7 @@ extInput = do
 instance IsDir Outer where
     toSignal (Wire w) = Output (Var w)
     extSignal = extInput
-    bindSignal (Output y) (Input x) = circuit $ do
-        tell $ (combs.at x ?~ y) mempty
+    bindSignal y (Input x) = liftCircuit $ x y
 
 type Direction d =
     (IsDir d, IsDir (Flip d), d ~ Flip (Flip d))

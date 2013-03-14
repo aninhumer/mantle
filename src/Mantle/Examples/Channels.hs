@@ -22,7 +22,7 @@ import Mantle.Logic
 data Channel a d = Channel {
     value :: Signal a d,
     valid :: Signal Bool d,
-    ready :: Signal Bool (Flip d)
+    enable :: Signal Bool (Flip d)
 }
 
 type InChan  a = Channel a Inner
@@ -87,19 +87,23 @@ instance Sink (InChan a) a where
 instance Sink (Pipe a b) a where
     snkChan = inchan
 
+
 type a :=> b = OutChan a -> OutChan b
 
 chanMap :: (a :-> b) -> (a :=> b)
 chanMap f (Channel v r e) = Channel (f v) r e
 
-chanZip :: MonadCircuit mc =>
+chanZip ::
     (Output a -> Output b -> Output c) ->
-    OutChan a -> OutChan b -> mc (OutChan c)
-chanZip f (Channel xv xr xe) (Channel yv yr ye) = do
-    (eo,ei) <- newIfc
-    xe =: eo && yr
-    ye =: eo && xr
-    return $ Channel (f xv yv) (xr && yr) ei
+    OutChan a -> OutChan b -> OutChan c
+chanZip f (Channel xv xr xe) (Channel yv yr ye) =
+    Channel {
+        value  = f xv yv,
+        valid  = xr && yr,
+        enable = Input (\eo -> do
+            xe =: eo && yr
+            ye =: eo && xr)
+    }
 
 chanGuard :: MonadCircuit mc =>
     Output Bool -> OutChan a -> mc (OutChan a)
@@ -124,8 +128,8 @@ src >>> snk = do
 
 
 (>+<), (>-<), (>*<) ::
-    (Num (Output a), MonadCircuit c) =>
-    OutChan a -> OutChan a -> c (OutChan a)
+    (Num (Output a)) =>
+    OutChan a -> OutChan a -> OutChan a
 (>+<) = chanZip (+)
 (>-<) = chanZip (-)
 (>*<) = chanZip (*)

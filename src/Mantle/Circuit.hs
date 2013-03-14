@@ -36,6 +36,10 @@ newRef = circuit $ do
     put $ ref + 1
     return $ Ref ref
 
+bindRef :: MonadCircuit c => Ref -> Expr -> c ()
+bindRef x e = circuit $ do
+    tell $ (combs.at x ?~ e) mempty
+
 newVar :: forall v a c. (Bits a, MonadCircuit c) =>
     Simple Lens RTL (M.Map Ref VType) -> (Ref -> v a) -> c (v a)
 newVar lens wrap = do
