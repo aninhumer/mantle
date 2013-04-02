@@ -24,13 +24,10 @@ infixr 8 :->
 
 infix 1 <=:
 (<=:) :: Reg a -> Output a -> Statement
-Reg r <=: e = do
-    tell $ (writes.at r ?~ unOutput e) mempty
+r <=: Output e = writeReg r e
 
 rd :: Reg a -> Output a
-rd (Reg ir) = Output $ case ir of
-    NRef r   -> Var r
-    IRef r i -> Index r i
+rd r = Output $ readReg r
 
 extern :: (Interface ifc, Interface (FlipIfc ifc), MonadCircuit c) =>
     ifc -> c ()

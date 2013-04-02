@@ -47,7 +47,7 @@ class IsDir d where
     bindSignal :: MonadCircuit c => Signal a d -> Signal a (Flip d) -> c ()
 
 refInput :: Ref -> Input a
-refInput x = Input $ \(Output e) -> bindRef x e
+refInput x = Input $ \(Output e) -> bindComb x e
 
 extOutput :: forall a c. (Bits a, MonadCircuit c) => c (Input a)
 extOutput = do
