@@ -20,8 +20,8 @@ import Mantle.Logic
 
 
 data Channel a d = Channel {
-    value :: Signal a d,
-    valid :: Signal Bool d,
+    value  :: Signal a d,
+    valid  :: Signal Bool d,
     enable :: Signal Bool (Flip d)
 }
 
@@ -88,14 +88,14 @@ instance Sink (Pipe a b) a where
     snkChan = inchan
 
 
-type a :=> b = OutChan a -> OutChan b
+type a :=>: b = OutChan a -> OutChan b
+type a :=>  b = OutChan a -> b
+infixr 8 :=>
 
-chanMap :: (a :-> b) -> (a :=> b)
+chanMap :: (a :->: b) -> (a :=>: b)
 chanMap f (Channel v r e) = Channel (f v) r e
 
-chanZip ::
-    (Output a -> Output b -> Output c) ->
-    OutChan a -> OutChan b -> OutChan c
+chanZip :: (a :-> b :->: c) -> (a :=> b :=>: c)
 chanZip f (Channel xv xr xe) (Channel yv yr ye) =
     Channel {
         value  = f xv yv,

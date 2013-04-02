@@ -18,8 +18,9 @@ import Mantle.Bits
 import Mantle.Circuit
 import Mantle.Interface
 
-
-type a :-> b = Output a -> Output b
+type a :->: b = Output a -> Output b
+type a :->  b = Output a -> b
+infixr 8 :->
 
 infix 1 <=:
 (<=:) :: Reg a -> Output a -> Statement
@@ -45,14 +46,14 @@ fanOut xs = do
     return i
 
 inputMap :: (Bits a, Bits b, MonadCircuit mc) =>
-    (a :-> b) -> Input b -> mc (Input a)
+    (a :->: b) -> Input b -> mc (Input a)
 inputMap f x = do
     (i,o) <- newIfc
     x =: f o
     return i
 
 fanOutMap :: (Bits a, Bits b, MonadCircuit mc) =>
-    (a :-> b) -> [Input b] -> mc (Input a)
+    (a :->: b) -> [Input b] -> mc (Input a)
 fanOutMap f xs = do
     x <- fanOut xs
     inputMap f x
