@@ -57,10 +57,8 @@ undef = Output $ Lit Undef
 literal :: Bits a => a -> Output a
 literal = Output . repExpr
 
-terminal :: (Bits a, MonadCircuit mc) => mc (Input a)
-terminal = do
-    (i,o) <- newIfc
-    return i
+terminal :: (Bits a, MonadCircuit mc) => Input a
+terminal = Input $ const $ return ()
 
 unOp :: UnaryOperator -> Output a -> Output a
 unOp op x = Output $ UnOp op (unOutput x)
