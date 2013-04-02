@@ -73,8 +73,8 @@ genRef :: Ref -> Doc
 genRef (Ref r) = "a" <> dshow (show r)
 
 genRegRef :: RegRef -> Doc
-genRegRef (NRef r) = genRef r
-genRegRef (IRef r i) = genRef r <> brackets (genExpr i)
+genRegRef (NormalRef  r  ) = genRef r
+genRegRef (IndexedRef r i) = genRef r <> brackets (genExpr i)
 
 genBlocks :: M.Map Trigger Block -> Doc
 genBlocks =

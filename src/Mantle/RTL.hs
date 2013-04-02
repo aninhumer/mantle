@@ -37,8 +37,8 @@ data Block = Block {
 
 type Update = M.Map RegRef Expr
 
-data RegRef = IRef Ref Expr
-            | NRef Ref
+data RegRef = IndexedRef Ref Expr
+            | NormalRef Ref
             deriving (Eq,Ord)
 
 data Expr = Lit Value

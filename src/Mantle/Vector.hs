@@ -38,4 +38,4 @@ type Vector n a = VectorIfc n a Outer
 type Memory n a = Reg (Vec n a)
 
 index :: Bits i => Output i -> Memory n a -> Reg a
-index (Output e) (Reg (NRef m)) = Reg $ IRef m e
+index (Output e) (Reg (NormalRef m)) = Reg $ IndexedRef m e

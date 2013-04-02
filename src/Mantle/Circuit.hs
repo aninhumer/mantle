@@ -69,12 +69,12 @@ bindComb x e = circuit $ do
 newtype Reg a = Reg { regVar :: RegRef }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
-newReg = newVar regs (Reg . NRef)
+newReg = newVar regs (Reg . NormalRef)
 
 readReg :: Reg a -> Expr
 readReg (Reg ir) = case ir of
-    NRef r   -> Var r
-    IRef r i -> Index r i
+    NormalRef  r   -> Var r
+    IndexedRef r i -> Index r i
 
 writeReg :: Reg a -> Expr -> Statement
 writeReg (Reg r) e = do
