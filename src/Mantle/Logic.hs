@@ -38,25 +38,18 @@ extern x = do
     o <- extIfc
     o =: x
 
-fanOut :: (Bits a, MonadCircuit mc) =>
-    [Input a] -> mc (Input a)
-fanOut xs = do
-    (i,o) <- newIfc
-    mapM (=: o) xs
-    return i
+fanOut :: (Bits a) => [Input a] -> Input a
+fanOut xs = Input $ (\i -> do
+    x <- comb i
+    forM_ xs (=: x) )
 
-inputMap :: (Bits a, Bits b, MonadCircuit mc) =>
-    (a :->: b) -> Input b -> mc (Input a)
-inputMap f x = do
-    (i,o) <- newIfc
-    x =: f o
-    return i
+inputMap :: (Bits a, Bits b) =>
+    (a :->: b) -> Input b -> Input a
+inputMap f x = Input $ (x =:) . f
 
-fanOutMap :: (Bits a, Bits b, MonadCircuit mc) =>
-    (a :->: b) -> [Input b] -> mc (Input a)
-fanOutMap f xs = do
-    x <- fanOut xs
-    inputMap f x
+fanOutMap :: (Bits a, Bits b) =>
+    (a :->: b) -> [Input b] -> Input a
+fanOutMap f = inputMap f . fanOut
 
 undef :: Output a
 undef = Output $ Lit Undef
