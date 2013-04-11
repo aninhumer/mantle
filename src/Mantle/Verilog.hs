@@ -57,15 +57,13 @@ genWires = genMap (genVar "wire")
 genRegs :: M.Map Ref VType -> Doc
 genRegs = genMap (genVar "reg")
 
-genCombs cs =
-    "always begin" <$>
-        indent 4 (genMap genComb cs) <$>
-    "end"
+genCombs cs = (genMap genComb cs)
   where
     genComb r e =
-        genRef r <+> "=" <+> genExpr e <> ";"
+        "assign" <+> genRef r <+> "=" <+> genExpr e <> ";"
 
 genRepr :: VType -> Doc
+genRepr (BitType 1) = ""
 genRepr (BitType n) = "[" <> int (n-1) <> ":0]"
 genRepr (VecType n r) = "[" <> int (n-1) <> ":0]" <> genRepr r
 
