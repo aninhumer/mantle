@@ -13,6 +13,8 @@ module Mantle.Examples.Channels where
 
 import Mantle.Prelude
 
+import Data.Monoid
+
 import Mantle.Bits
 import Mantle.Interface
 import Mantle.Circuit
@@ -100,9 +102,10 @@ chanZip f (Channel xv xr xe) (Channel yv yr ye) =
     Channel {
         value  = f xv yv,
         valid  = xr && yr,
-        enable = Input (\eo -> do
-            xe =: eo && yr
-            ye =: eo && xr)
+        enable = mconcat [
+                inputMap (&& yr) xe,
+                inputMap (&& xr) ye
+            ]
     }
 
 chanGuard :: Bool :-> (a :=>: a)

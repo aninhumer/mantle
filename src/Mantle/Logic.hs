@@ -35,17 +35,13 @@ extern x = do
     o <- extIfc
     o =: x
 
-fanOut :: (Bits a) => [Input a] -> Input a
-fanOut xs = Input $ (\i -> do
-    x <- comb i
-    forM_ xs (=: x) )
+fanOut :: [Input a] -> Input a
+fanOut = mconcat
 
-inputMap :: (Bits a, Bits b) =>
-    (a :->: b) -> Input b -> Input a
-inputMap f x = Input $ (x =:) . f
+inputMap :: (a :->: b) -> Input b -> Input a
+inputMap f (Input x) = Input $ fmap (. f) x
 
-fanOutMap :: (Bits a, Bits b) =>
-    (a :->: b) -> [Input b] -> Input a
+fanOutMap :: (a :->: b) -> [Input b] -> Input a
 fanOutMap f = inputMap f . fanOut
 
 undef :: Output a
@@ -54,8 +50,8 @@ undef = Output $ Lit Undef
 literal :: Bits a => a -> Output a
 literal = Output . repExpr
 
-terminal :: (Bits a, MonadCircuit mc) => Input a
-terminal = Input $ const $ return ()
+terminal :: Input a
+terminal = mempty
 
 unOp :: UnaryOperator -> Output a -> Output a
 unOp op x = Output $ UnOp op (unOutput x)
@@ -103,17 +99,6 @@ instance Num (Output Int) where
         if x > 0 then 1 else
         if x < 0 then (-1) else 0
     fromInteger = literal . fromInteger
-
-toWire :: forall a. Bits a => Output a -> Circuit (Wire a)
-toWire x = do
-    (Wire w :: Wire a) <- newWire
-    (refInput w) =: x
-    return $ Wire w
-
-comb :: Bits a => Output a -> Circuit (Output a)
-comb x = do
-    (Wire w) <- toWire x
-    return $ Output (Var w)
 
 
 iff :: Output Bool -> Statement -> Statement

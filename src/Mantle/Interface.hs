@@ -3,12 +3,14 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module Mantle.Interface where
 
 import Control.Lens
 import Control.Monad.Writer
+import qualified Data.Map as M
 
 import Mantle.RTL
 import Mantle.Bits
@@ -33,21 +35,49 @@ class Interface ifc where
 
 data family   Signal a (d :: FaceK)
 data instance Signal a Inner =
-    Input  { unInput :: Output a -> Circuit () }
+    Input  { unInput :: M.Map Ref (Output a -> Expr) }
 data instance Signal a Outer =
     Output { unOutput :: Expr }
 
 type Input  a = Signal a Inner
 type Output a = Signal a Outer
 
+outputWire :: forall a. Bits a => Output a -> Circuit (Wire a)
+outputWire x = do
+    (Wire w :: Wire a) <- newWire
+    (refInput w) =: x
+    return $ Wire w
+
+combOutput :: Bits a => Output a -> Circuit (Output a)
+combOutput x = do
+    (Wire w) <- outputWire x
+    return $ Output (Var w)
+
+refInput :: Ref -> Input a
+refInput x = Input $ M.singleton x unOutput
+
+assocsInput :: [(Ref, Output a -> Expr)] -> Input a
+assocsInput xs =
+    Input $ M.fromListWith (error "Conflicting Inputs") xs
+
+bind :: Bits a => Input a -> Output a -> Circuit ()
+bind (Input i) o = do
+    signal <- if M.size i <= 1
+        then return o
+        else combOutput o
+    let bound = M.mapWithKey bindComb $ M.map ($ signal) i
+    sequence_ $ M.elems $ bound
+
+instance Monoid (Input a) where
+    mempty  = Input $ mempty
+    mappend (Input x) (Input y) =
+        Input $ M.unionWith (error "Conflicting Inputs") x y
+
 
 class IsDir d where
     toSignal :: Wire a -> Signal a d
     extSignal :: (Bits a, MonadCircuit c) => c (Signal a d)
-    bindSignal :: MonadCircuit c => Signal a d -> Signal a (Flip d) -> c ()
-
-refInput :: Ref -> Input a
-refInput x = Input $ \(Output e) -> bindComb x e
+    bindSignal :: (Bits a, MonadCircuit c) => Signal a d -> Signal a (Flip d) -> c ()
 
 extOutput :: forall a c. (Bits a, MonadCircuit c) => c (Input a)
 extOutput = do
@@ -57,7 +87,7 @@ extOutput = do
 instance IsDir Inner where
     toSignal (Wire w) = refInput w
     extSignal = extOutput
-    bindSignal (Input x) y = liftCircuit $ x y
+    bindSignal x y = liftCircuit $ bind x y
 
 extInput :: forall a c. (Bits a, MonadCircuit c) => c (Output a)
 extInput = do
@@ -67,7 +97,7 @@ extInput = do
 instance IsDir Outer where
     toSignal (Wire w) = Output (Var w)
     extSignal = extInput
-    bindSignal y (Input x) = liftCircuit $ x y
+    bindSignal y x = liftCircuit $ bind x y
 
 type Direction d =
     (IsDir d, IsDir (Flip d), d ~ Flip (Flip d))
