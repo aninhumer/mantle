@@ -101,8 +101,15 @@ instance Num (Output Int) where
     fromInteger = literal . fromInteger
 
 
+if2 :: Output Bool -> Statement -> Statement -> Statement
+if2 cond ts es = do
+    let t = execWriter ts
+    let e = execWriter es
+    let c = unOutput cond
+    tell $ (conds.at c ?~ (t,e)) mempty
+
 iff :: Output Bool -> Statement -> Statement
 iff cond stmt = do
     let (_,blk) = runWriter stmt
     let c = unOutput cond
-    tell $ (conds.at c ?~ blk) mempty
+    tell $ (conds.at c ?~ (blk,mempty)) mempty

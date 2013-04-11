@@ -5,6 +5,7 @@
 module Mantle.Verilog where
 
 import Data.Foldable
+import Data.Monoid hiding ((<>))
 import qualified Data.Map as M
 import Data.Text.Lazy hiding (map)
 import Text.PrettyPrint.Leijen.Text
@@ -94,12 +95,16 @@ genBlock (Block cs ws) =
     "end"
   where
 
-genConds :: M.Map Expr Block -> Doc
+genConds :: M.Map Expr (Block,Block) -> Doc
 genConds =
     genMap genCond
   where
-    genCond c b =
-        "if (" <> genExpr c <> ")" <+> genBlock b
+    genCond c (t,e) =
+        "if (" <> genExpr c <> ")"
+            <+> genBlock t <+> elseClause e
+    elseClause e
+        | e == mempty = ""
+        | otherwise   = "else" <+> genBlock e
 
 genWrites :: Update -> Doc
 genWrites =

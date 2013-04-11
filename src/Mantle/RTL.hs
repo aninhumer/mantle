@@ -31,9 +31,9 @@ data Edge = PosEdge Ref
           deriving (Eq,Ord)
 
 data Block = Block {
-    _conds  :: M.Map Expr Block,
+    _conds  :: M.Map Expr (Block,Block),
     _writes :: Update
-}
+} deriving (Eq)
 
 type Update = M.Map RegRef Expr
 
