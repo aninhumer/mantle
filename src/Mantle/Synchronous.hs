@@ -19,14 +19,14 @@ newtype Clock = Clock { unClock :: ExtInput Bool }
 
 newClock :: MonadCircuit c => c Clock
 newClock = do
-    c <- newExtInput
+    c <- newExtInput "clk"
     return $ Clock c
 
 newtype Reset = Reset { unReset :: ExtInput Bool }
 
 newReset :: MonadCircuit c => c Reset
 newReset = do
-    r <- newExtInput
+    r <- newExtInput "rst_n"
     return $ Reset r
 
 type ClockReset = (Clock, Reset)

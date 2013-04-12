@@ -36,31 +36,36 @@ newRef = circuit $ do
     put $ ref + 1
     return $ Ref ref
 
+namedRef :: MonadCircuit mc => String -> mc Ref
+namedRef = return . Named
+
 newVar :: forall v a c. (Bits a, MonadCircuit c) =>
-    Simple Lens RTL (M.Map Ref VType) -> (Ref -> v a) -> c (v a)
-newVar lens wrap = do
-    ref <- newRef
-    circuit $ do
-        tell $ (lens.at ref ?~ size) mempty
-        return $ wrap ref
+    DType -> Maybe String -> (Ref -> v a) -> c (v a)
+newVar tag name wrap = do
+    ref <- case name of
+        Just x  -> namedRef x
+        Nothing -> newRef
+    let newDecl = Declaration tag size ref
+    circuit $ tell $ (decls .~ [newDecl]) mempty
+    return $ wrap ref
     where size = repType (undefined :: a)
 
 newtype ExtInput a = ExtInput Ref
 
 newExtInput :: forall a c.
-    (Bits a, MonadCircuit c) => c (ExtInput a)
-newExtInput = newVar inputs ExtInput
+    (Bits a, MonadCircuit c) => String -> c (ExtInput a)
+newExtInput n = newVar DInput (Just n) ExtInput
 
 newtype ExtOutput a = ExtOutput Ref
 
 newExtOutput :: forall a c.
-    (Bits a, MonadCircuit c) => c (ExtOutput a)
-newExtOutput = newVar outputs ExtOutput
+    (Bits a, MonadCircuit c) => String -> c (ExtOutput a)
+newExtOutput n = newVar DOutput (Just n) ExtOutput
 
 newtype Wire a = Wire { wireVar :: Ref }
 
 newWire :: forall a c. (Bits a, MonadCircuit c) => c (Wire a)
-newWire = newVar wires Wire
+newWire = newVar DWire Nothing Wire
 
 bindComb :: MonadCircuit c => Ref -> Expr -> c ()
 bindComb x e = circuit $ do
@@ -69,7 +74,7 @@ bindComb x e = circuit $ do
 newtype Reg a = Reg { regVar :: RegRef }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
-newReg = newVar regs (Reg . NormalRef)
+newReg = newVar DReg Nothing (Reg . NormalRef)
 
 readReg :: Reg a -> Expr
 readReg (Reg ir) = case ir of

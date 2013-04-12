@@ -9,20 +9,28 @@ import qualified Data.Set as Set
 
 
 data RTL = RTL {
-    _inputs  :: M.Map Ref VType,
-    _outputs :: M.Map Ref VType,
-    _wires   :: M.Map Ref VType,
-    _regs    :: M.Map Ref VType,
-    _combs   :: M.Map Ref Expr,
-    _blocks  :: M.Map Trigger Block
+    _decls  :: [Declaration],
+    _combs  :: M.Map Ref Expr,
+    _blocks :: M.Map Trigger Block
 }
 
-newtype Ref = Ref Int
+data Ref = Ref Int
+         | Named String
     deriving (Eq, Ord)
 
 -- TODO: BitType with no Int.
 data VType = BitType Int
            | VecType Int VType
+
+data Declaration = Declaration {
+    dtype :: DType,
+    vtype :: VType,
+    dref  :: Ref
+}
+
+data DType = DInput | DOutput
+           | DWire  | DReg
+           deriving (Eq)
 
 type Trigger = Set.Set Edge
 
@@ -70,10 +78,9 @@ data UnaryOperator = OpNegate | OpNot -- ...
 
 
 instance Monoid RTL where
-    mempty = RTL mempty mempty mempty mempty mempty mempty
-    mappend (RTL xi xo xw xr xc xb) (RTL yi yo yw yr yc yb) =
-        RTL (xi <> yi) (xo <> yo) (xw <> yw) (xr <> yr)
-            (xc <> yc) (M.unionWith (<>) xb yb)
+    mempty = RTL mempty mempty mempty
+    mappend (RTL xd xc xb) (RTL yd yc yb) =
+        RTL (xd <> yd) (xc <> yc) (M.unionWith (<>) xb yb)
 
 instance Monoid Block where
     mempty = Block M.empty M.empty

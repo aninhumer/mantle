@@ -4,10 +4,10 @@
 
 module Mantle.Verilog where
 
-import Data.Foldable
+import Data.Foldable hiding (elem)
 import Data.Monoid hiding ((<>))
 import qualified Data.Map as M
-import Data.Text.Lazy hiding (map)
+import qualified Data.Text.Lazy as T
 import Text.PrettyPrint.Leijen.Text
 
 import Mantle.RTL
@@ -15,18 +15,19 @@ import Mantle.Circuit
 import Mantle.Interface
 
 dshow :: String -> Doc
-dshow = text.pack
+dshow = text . T.pack
 
 genMap :: (a -> b -> Doc) -> M.Map a b -> Doc
 genMap f m = vcat $ map (uncurry f) $ M.assocs m
 
 genModule :: String -> RTL -> Doc
-genModule name rtl@(RTL is os _ _ _ _) =
+genModule name rtl@(RTL ds _ _) =
     "module" <+> dshow name <+> tupled ioNames <> ";" <$>
         indent 4 (genRTL rtl) <$>
     "endmodule"
   where
-    ioNames = map genRef $ (M.keys is) ++ (M.keys os)
+    ioNames = map (genRef . dref) ioDecls
+    ioDecls = filter (flip elem [DInput,DOutput] . dtype) ds
 
 genComponent :: forall ifc. Interface (FlipIfc ifc) =>
     String -> Component Circuit ifc -> Doc
@@ -34,42 +35,36 @@ genComponent name comp =
     genModule name (buildCircuit (makeExtern comp :: Circuit (VoidIfc ifc)))
 
 genRTL :: RTL -> Doc
-genRTL (RTL is os ws rs cs bs) =
-    genInputs is <$>
-    genOutputs os <$>
-    genWires ws <$>
-    genRegs rs <$>
+genRTL (RTL ds cs bs) =
+    genDecls ds <$>
     genCombs cs <$>
     genBlocks bs
 
-genVar :: Doc -> Ref -> VType -> Doc
-genVar d r w =
-    d <+> genRepr w <+> genRef r <> ";"
+genDecls :: [Declaration] -> Doc
+genDecls = vcat . map genDecl
+  where
+    genDecl (Declaration d v r) =
+        genDType d <+> genVType v <+> genRef r <> ";"
 
-genInputs :: M.Map Ref VType -> Doc
-genInputs = genMap (genVar "input")
-
-genOutputs :: M.Map Ref VType -> Doc
-genOutputs = genMap (genVar "output")
-
-genWires :: M.Map Ref VType -> Doc
-genWires = genMap (genVar "wire")
-
-genRegs :: M.Map Ref VType -> Doc
-genRegs = genMap (genVar "reg")
+genDType :: DType -> Doc
+genDType DInput  = "input"
+genDType DOutput = "output"
+genDType DWire   = "wire"
+genDType DReg    = "reg"
 
 genCombs cs = (genMap genComb cs)
   where
     genComb r e =
         "assign" <+> genRef r <+> "=" <+> genExpr e <> ";"
 
-genRepr :: VType -> Doc
-genRepr (BitType 1) = ""
-genRepr (BitType n) = "[" <> int (n-1) <> ":0]"
-genRepr (VecType n r) = "[" <> int (n-1) <> ":0]" <> genRepr r
+genVType :: VType -> Doc
+genVType (BitType 1) = ""
+genVType (BitType n) = "[" <> int (n-1) <> ":0]"
+genVType (VecType n r) = "[" <> int (n-1) <> ":0]" <> genVType r
 
 genRef :: Ref -> Doc
-genRef (Ref r) = "a" <> dshow (show r)
+genRef (Ref r)   = "a" <> dshow (show r)
+genRef (Named n) = dshow n
 
 genRegRef :: RegRef -> Doc
 genRegRef (NormalRef  r  ) = genRef r

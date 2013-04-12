@@ -79,24 +79,26 @@ class IsDir d where
     extSignal :: (Bits a, MonadCircuit c) => c (Signal a d)
     bindSignal :: (Bits a, MonadCircuit c) => Signal a d -> Signal a (Flip d) -> c ()
 
-extOutput :: forall a c. (Bits a, MonadCircuit c) => c (Input a)
-extOutput = do
-    (ExtOutput o :: ExtOutput a) <- newExtOutput
+extOutput :: forall a c. (Bits a, MonadCircuit c)
+    => String -> c (Input a)
+extOutput n = do
+    (ExtOutput o :: ExtOutput a) <- newExtOutput n
     return $ refInput o
 
 instance IsDir Inner where
     toSignal (Wire w) = refInput w
-    extSignal = extOutput
+    extSignal = extOutput Nothing
     bindSignal x y = liftCircuit $ bind x y
 
-extInput :: forall a c. (Bits a, MonadCircuit c) => c (Output a)
-extInput = do
-    (ExtInput i :: ExtInput a) <- newExtInput
+extInput :: forall a c. (Bits a, MonadCircuit c)
+    => String -> c (Output a)
+extInput n = do
+    (ExtInput i :: ExtInput a) <- newExtInput n
     return $ Output (Var i)
 
 instance IsDir Outer where
     toSignal (Wire w) = Output (Var w)
-    extSignal = extInput
+    extSignal = extInput Nothing
     bindSignal y x = liftCircuit $ bind x y
 
 type Direction d =
