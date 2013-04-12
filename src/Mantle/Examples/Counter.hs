@@ -23,4 +23,4 @@ counterExt = do
     c :: Output Int <- make counter
     extern c
 
-counterCode = genModule "counter" $ buildSync counterExt
+counterCode = genModule "IntCounter" $ buildSync counterExt
