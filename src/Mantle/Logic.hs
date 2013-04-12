@@ -72,6 +72,7 @@ not = unOp OpNot
 (&&) = binOp OpAnd
 (||) = binOp OpOr
 
+-- TODO: Generalise to all interfaces
 ifThenElse ::
     Output Bool -> Output a -> Output a -> Output a
 ifThenElse c x y =

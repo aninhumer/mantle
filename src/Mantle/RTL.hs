@@ -20,6 +20,7 @@ data RTL = RTL {
 newtype Ref = Ref Int
     deriving (Eq, Ord)
 
+-- TODO: BitType with no Int.
 data VType = BitType Int
            | VecType Int VType
 
