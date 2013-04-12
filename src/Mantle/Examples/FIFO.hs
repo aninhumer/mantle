@@ -16,27 +16,27 @@ import Mantle.Examples.Channels
 type FIFO a = Pipe a a
 
 fifo :: Bits a => SyncComp (FIFO a)
-fifo (Pipe inchan outchan) = do
+fifo (Server inchan outchan) = do
 
     val  <- regU
     full <- reg False
 
     valid outchan =: rd full
     value outchan =: rd val
-    enable inchan  =: not (rd full)
+    ready inchan  =: not (rd full)
 
     onClock $ do
         iff (not (rd full) && valid inchan) $ do
             val  <=: value inchan
             full <=: true
-        iff (rd full && enable outchan) $ do
+        iff (rd full && ready outchan) $ do
             full <=: false
 
 
 fifoChain :: forall a. (Integral a, Bits a) => SyncComp (FIFO a)
-fifoChain (Pipe inchan outchan) = do
+fifoChain (Server inchan outchan) = do
     fifoA :: FIFO a <- make fifo
     fifoB :: FIFO a <- make fifo
-    inchan >>> fifoA
-    fifoA >>> fifoB
-    fifoB >>> outchan
+    inchan >-> fifoA
+    fifoA >-> fifoB
+    fifoB >-> outchan
