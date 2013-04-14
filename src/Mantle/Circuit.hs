@@ -7,7 +7,6 @@ module Mantle.Circuit where
 import Control.Monad.State
 import Control.Monad.Writer
 import Control.Lens
-import qualified Data.Map as M
 import qualified Data.Set as Set
 
 import Mantle.RTL
@@ -91,7 +90,7 @@ type StmtM = Writer Block
 
 onTrigger :: MonadCircuit c => Trigger -> Statement -> c ()
 onTrigger trig stmt = do
-    let (_,newBlock) = runWriter stmt
+    let newBlock = execWriter stmt
     circuit $ tell $ (blocks.at trig ?~ newBlock) mempty
 
 posedge :: ExtInput a -> Trigger

@@ -56,14 +56,14 @@ syncTrigger (Clock c, Reset r) =
 
 onClock :: Statement -> Synchronous ()
 onClock stmt = do
-    cr@(Clock (ExtInput c), (Reset (ExtInput r))) <- ask
+    cr@(Clock (ExtInput c), Reset (ExtInput r)) <- ask
     onTrigger (syncTrigger cr) $
         if2 (not (Output (Var r))) (return ()) $
         iff (Output (Var c)) stmt
 
 onReset :: Statement -> Synchronous ()
 onReset stmt = do
-    cr@(_ ,(Reset (ExtInput r))) <- ask
+    cr@(_, Reset (ExtInput r)) <- ask
     onTrigger (syncTrigger cr) $ iff (not (Output (Var r))) stmt
 
 (=~) :: Reg a -> Output a -> Synchronous ()

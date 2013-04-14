@@ -12,7 +12,6 @@ import Text.PrettyPrint.Leijen.Text
 
 import Mantle.RTL
 import Mantle.Circuit
-import Mantle.Interface
 
 dshow :: String -> Doc
 dshow = text . T.pack
@@ -51,7 +50,7 @@ genDType DWire   = "wire"
 genDType DReg    = "reg"
 
 genCombs :: M.Map LValue Expr -> Doc
-genCombs cs = (genMap genComb cs)
+genCombs cs = genMap genComb cs
   where
     genComb l e =
         "assign" <+> genLValue l <+> "=" <+> genExpr e <> ";"

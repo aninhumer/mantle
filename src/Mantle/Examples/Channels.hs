@@ -3,7 +3,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -20,7 +19,6 @@ import Mantle.Bits
 import Mantle.Interface
 import Mantle.Circuit
 import Mantle.Logic
-
 
 
 data Channel d ifc = Channel {
@@ -58,7 +56,7 @@ instance Functor (Channel Outer) where
     fmap f (Channel x v r) = Channel (f x) v r
 
 instance Applicative (Channel Outer) where
-    pure x = (Channel x true terminal)
+    pure x = Channel x true terminal
     (Channel f fv fr) <*> (Channel x xv xr) =
         Channel (f x) (fv && xv) $
             inputMap (&& xv) fr <> inputMap (&& fv) xr
