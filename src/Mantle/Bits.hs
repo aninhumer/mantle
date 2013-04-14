@@ -2,9 +2,8 @@
 
 module Mantle.Bits where
 
-import Data.Vector.Fixed
-import Data.Vector.Fixed.Internal
-import Data.Vector.Fixed.Boxed
+import qualified Data.Vector.Fixed as V
+import Data.Vector.Fixed.Boxed (Vec)
 
 import Mantle.RTL
 
@@ -22,9 +21,9 @@ instance Bits Int where
     repType _ = VecType 64 BitType
     repExpr = Lit . Dec . toInteger
 
-instance (Arity n, Bits a) => Bits (Vec n a) where
+instance (V.Arity n, Bits a) => Bits (Vec n a) where
     repType _ = VecType nval arep
       where
-        nval = arity   (undefined :: n)
-        arep = repType (undefined :: a)
-    repExpr v = Concat $ Prelude.map repExpr $ toList v
+        nval = V.length (undefined :: Vec n a)
+        arep = repType  (undefined :: a)
+    repExpr v = Concat $ map repExpr $ V.toList v
