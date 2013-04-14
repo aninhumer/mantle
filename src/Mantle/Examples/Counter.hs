@@ -13,11 +13,15 @@ import Mantle.Verilog
 
 counter :: SyncComp (Output Int)
 counter out = do
-    val <- reg 0
+    count <- reg 0
     onClock $ do
-        val <=: rd val + 1
-    out =: rd val
+        count <=: rd count + 1
+    out =: rd count
 
-counterMod :: Synchronous (Output Int)
-counterMod = make counter
+extCounter :: Synchronous ()
+extCounter = do
+    (out :: Output Int) <- make counter
+    ext <- extOutput "count"
+    ext =: out
 
+counterCode = genModule "IntCounter" $ buildSync extCounter
