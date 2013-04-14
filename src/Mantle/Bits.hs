@@ -13,12 +13,13 @@ class Bits a where
     repExpr :: a -> Expr
 
 instance Bits Bool where
-    repType _ = BitType 1
+    repType _ = BitType
     repExpr True  = Lit $ Dec 1
     repExpr False = Lit $ Dec 0
 
 instance Bits Int where
-    repType _ = BitType 64 -- TODO: Replace with explicit IntNs
+    -- TODO: Replace with explicit IntNs
+    repType _ = VecType 64 BitType
     repExpr = Lit . Dec . toInteger
 
 instance (Arity n, Bits a) => Bits (Vec n a) where

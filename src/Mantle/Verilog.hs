@@ -56,8 +56,7 @@ genCombs cs = (genMap genComb cs)
         "assign" <+> genRef r <+> "=" <+> genExpr e <> ";"
 
 genVType :: VType -> Doc
-genVType (BitType 1) = ""
-genVType (BitType n) = "[" <> int (n-1) <> ":0]"
+genVType BitType = ""
 genVType (VecType n r) = "[" <> int (n-1) <> ":0]" <> genVType r
 
 genRef :: Ref -> Doc

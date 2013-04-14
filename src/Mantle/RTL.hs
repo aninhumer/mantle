@@ -19,7 +19,7 @@ data Ref = Ref Int
     deriving (Eq, Ord)
 
 -- TODO: BitType with no Int.
-data VType = BitType Int
+data VType = BitType
            | VecType Int VType
 
 data Declaration = Declaration {
