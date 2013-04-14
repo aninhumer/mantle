@@ -71,7 +71,7 @@ bindComb :: MonadCircuit c => Ref -> Expr -> c ()
 bindComb x e = circuit $ do
     tell $ (combs.at x ?~ e) mempty
 
-newtype Reg a = Reg { regVar :: RegRef }
+newtype Reg a = Reg { regVar :: LValue }
 
 newReg :: forall a c. (MonadCircuit c, Bits a) => c (Reg a)
 newReg = newVar DReg Nothing (Reg . NormalRef)

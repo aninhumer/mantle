@@ -44,9 +44,9 @@ data Block = Block {
     _writes :: Update
 } deriving (Eq)
 
-type Update = M.Map RegRef Expr
+type Update = M.Map LValue Expr
 
-data RegRef = IndexedRef Ref Expr
+data LValue = IndexedRef Ref Expr
             | NormalRef Ref
             deriving (Eq,Ord)
 

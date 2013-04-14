@@ -64,9 +64,9 @@ genRef :: Ref -> Doc
 genRef (Ref r)   = "a" <> dshow (show r)
 genRef (Named n) = dshow n
 
-genRegRef :: RegRef -> Doc
-genRegRef (NormalRef  r  ) = genRef r
-genRegRef (IndexedRef r i) = genRef r <> brackets (genExpr i)
+genLValue :: LValue -> Doc
+genLValue (NormalRef  r  ) = genRef r
+genLValue (IndexedRef r i) = genRef r <> brackets (genExpr i)
 
 genBlocks :: M.Map Trigger Block -> Doc
 genBlocks =
@@ -103,7 +103,7 @@ genWrites :: Update -> Doc
 genWrites =
     genMap genWrite
   where
-    genWrite r e = genRegRef r <+> "<=" <+> genExpr e <> ";"
+    genWrite r e = genLValue r <+> "<=" <+> genExpr e <> ";"
 
 genExpr :: Expr -> Doc
 genExpr (Lit bv) = genLiteral bv
