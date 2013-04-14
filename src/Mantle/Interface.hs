@@ -17,9 +17,10 @@ import Mantle.Bits
 import Mantle.Circuit
 
 
-data FaceK = Inner | Outer
+data Inner
+data Outer
 
-type family   Flip (d :: FaceK) :: FaceK
+type family   Flip d
 type instance Flip Inner = Outer
 type instance Flip Outer = Inner
 
@@ -32,7 +33,7 @@ class Interface ifc where
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
     (=:)   :: MonadCircuit c => FlipIfc ifc -> ifc -> c ()
 
-data family   Signal a (d :: FaceK)
+data family   Signal a d
 data instance Signal a Inner =
     Input  { unInput :: M.Map Ref (Output a -> Expr) }
 data instance Signal a Outer =
