@@ -39,11 +39,6 @@ instance (Direction d, Interface ifc)
         (vx,vy) <- newIfc
         (rx,ry) <- newIfc
         return (Channel cx vx rx, Channel cy vy ry)
-    extIfc = do
-        c <- extIfc
-        v <- extIfc
-        r <- extIfc
-        return $ Channel c v r
     (Channel cx vx rx) =: (Channel cy vy ry) = do
         cx =: cy
         vx =: vy
@@ -87,10 +82,6 @@ instance (Direction d, Interface a, Interface b)
         (ix,iy) <- newIfc
         (ox,oy) <- newIfc
         return (Server ix ox, Server iy oy)
-    extIfc = do
-        i <- extIfc
-        o <- extIfc
-        return $ Server i o
     (Server ix ox) =: (Server iy oy) = do
         ix =: iy
         ox =: oy

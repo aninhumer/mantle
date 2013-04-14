@@ -18,9 +18,6 @@ counter out = do
         val <=: rd val + 1
     out =: rd val
 
-counterExt :: Synchronous ()
-counterExt = do
-    c :: Output Int <- make counter
-    extern c
+counterMod :: Synchronous (Output Int)
+counterMod = make counter
 
-counterCode = genModule "IntCounter" $ buildSync counterExt

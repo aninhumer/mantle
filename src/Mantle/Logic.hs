@@ -29,12 +29,6 @@ r <=: Output e = writeReg r e
 rd :: Reg a -> Output a
 rd r = Output $ readReg r
 
-extern :: (Interface ifc, Interface (FlipIfc ifc), MonadCircuit c) =>
-    ifc -> c ()
-extern x = do
-    o <- extIfc
-    o =: x
-
 fanOut :: [Input a] -> Input a
 fanOut = mconcat
 

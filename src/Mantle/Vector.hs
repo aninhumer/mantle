@@ -25,9 +25,6 @@ instance (V.Arity n, Direction d, Bits a) =>
     newIfc = do
         pairs <- V.replicateM newIfc
         return (V.map fst pairs, V.map snd pairs)
-    extIfc = do
-        ext <- V.replicateM extIfc
-        return ext
     xs =: ys = do
         V.zipWithM (=:) xs ys
         return ()

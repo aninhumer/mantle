@@ -29,10 +29,8 @@ genModule name rtl@(RTL ds _ _) =
     ioNames = map (genRef . dref) ioDecls
     ioDecls = filter (flip elem [DInput,DOutput] . dtype) ds
 
-genComponent :: forall ifc. Interface (FlipIfc ifc) =>
-    String -> Component Circuit ifc -> Doc
-genComponent name comp =
-    genModule name (buildCircuit (makeExtern comp :: Circuit (VoidIfc ifc)))
+genComponent :: String -> Circuit () -> Doc
+genComponent name = genModule name . buildCircuit
 
 genRTL :: RTL -> Doc
 genRTL (RTL ds cs bs) =

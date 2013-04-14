@@ -30,7 +30,6 @@ infix 1 =:
 class Interface ifc where
     type FlipIfc ifc
     newIfc :: MonadCircuit c => c (ifc, FlipIfc ifc)
-    extIfc :: MonadCircuit c => c (ifc)
     (=:)   :: MonadCircuit c => FlipIfc ifc -> ifc -> c ()
 
 data family   Signal a (d :: FaceK)
@@ -76,7 +75,6 @@ instance Monoid (Input a) where
 
 class IsDir d where
     toSignal :: Wire a -> Signal a d
-    extSignal :: (Bits a, MonadCircuit c) => c (Signal a d)
     bindSignal :: (Bits a, MonadCircuit c) => Signal a d -> Signal a (Flip d) -> c ()
 
 extOutput :: forall a c. (Bits a, MonadCircuit c)
@@ -87,7 +85,6 @@ extOutput n = do
 
 instance IsDir Inner where
     toSignal (Wire w) = refInput w
-    extSignal = extOutput Nothing
     bindSignal x y = liftCircuit $ bind x y
 
 extInput :: forall a c. (Bits a, MonadCircuit c)
@@ -98,7 +95,6 @@ extInput n = do
 
 instance IsDir Outer where
     toSignal (Wire w) = Output (Var w)
-    extSignal = extInput Nothing
     bindSignal y x = liftCircuit $ bind x y
 
 type Direction d =
@@ -110,7 +106,6 @@ instance (Direction d, Bits a) => Interface (Signal a d) where
     newIfc = do
         w <- newWire
         return (toSignal w, toSignal w)
-    extIfc = extSignal
     (=:) = bindSignal
 
 
@@ -123,18 +118,10 @@ make compF = do
     compF inner
     return outer
 
-makeExtern :: forall ifc c. (Interface (FlipIfc ifc), MonadCircuit c) =>
-    Component c ifc -> c (VoidIfc ifc)
-makeExtern compF = do
-    ext <- extIfc
-    compF ext
-    return VoidIfc
-
 
 instance Interface () where
     type FlipIfc () = ()
     newIfc = return ((),())
-    extIfc = return ()
     _ =: _ = return ()
 
 
@@ -144,10 +131,6 @@ instance (Interface a, Interface b) => Interface (a,b) where
         (ax,ay) <- newIfc
         (bx,by) <- newIfc
         return ((ax,bx),(ay,by))
-    extIfc = do
-        a <- extIfc
-        b <- extIfc
-        return (a,b)
     (x1,y1) =: (x2,y2) = do
         x1 =: x2
         y1 =: y2
