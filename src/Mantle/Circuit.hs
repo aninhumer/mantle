@@ -16,7 +16,7 @@ import Mantle.Bits
 
 newtype Circuit a = Circuit
     { unCircuit :: StateT Int (Writer RTL) a }
-    deriving (Monad)
+    deriving (Functor, Monad)
 
 class Monad m => MonadCircuit m where
     liftCircuit :: Circuit a -> m a
