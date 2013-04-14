@@ -35,7 +35,7 @@ class Interface ifc where
 
 data family   Signal a d
 data instance Signal a Inner =
-    Input  { unInput :: M.Map Ref (Output a -> Expr) }
+    Input  { unInput :: M.Map LValue (Output a -> Expr) }
 data instance Signal a Outer =
     Output { unOutput :: Expr }
 
@@ -54,9 +54,9 @@ combOutput x = do
     return $ Output (Var w)
 
 refInput :: Ref -> Input a
-refInput x = Input $ M.singleton x unOutput
+refInput x = Input $ M.singleton (NormalRef x) unOutput
 
-assocsInput :: [(Ref, Output a -> Expr)] -> Input a
+assocsInput :: [(LValue, Output a -> Expr)] -> Input a
 assocsInput xs =
     Input $ M.fromListWith (error "Conflicting Inputs") xs
 

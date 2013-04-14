@@ -50,10 +50,11 @@ genDType DOutput = "output"
 genDType DWire   = "wire"
 genDType DReg    = "reg"
 
+genCombs :: M.Map LValue Expr -> Doc
 genCombs cs = (genMap genComb cs)
   where
-    genComb r e =
-        "assign" <+> genRef r <+> "=" <+> genExpr e <> ";"
+    genComb l e =
+        "assign" <+> genLValue l <+> "=" <+> genExpr e <> ";"
 
 genVType :: VType -> Doc
 genVType BitType = ""
@@ -98,11 +99,11 @@ genConds =
         | e == mempty = ""
         | otherwise   = "else" <+> genBlock e
 
-genWrites :: Update -> Doc
+genWrites :: M.Map LValue Expr -> Doc
 genWrites =
     genMap genWrite
   where
-    genWrite r e = genLValue r <+> "<=" <+> genExpr e <> ";"
+    genWrite l e = genLValue l <+> "<=" <+> genExpr e <> ";"
 
 genExpr :: Expr -> Doc
 genExpr (Lit bv) = genLiteral bv

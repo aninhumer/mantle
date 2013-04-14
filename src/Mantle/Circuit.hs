@@ -67,7 +67,7 @@ newtype Wire a = Wire { wireVar :: Ref }
 newWire :: forall a c. (Bits a, MonadCircuit c) => c (Wire a)
 newWire = newVar DWire Nothing Wire
 
-bindComb :: MonadCircuit c => Ref -> Expr -> c ()
+bindComb :: MonadCircuit c => LValue -> Expr -> c ()
 bindComb x e = circuit $ do
     tell $ (combs.at x ?~ e) mempty
 

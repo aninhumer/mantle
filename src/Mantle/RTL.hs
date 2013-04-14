@@ -10,7 +10,7 @@ import qualified Data.Set as Set
 
 data RTL = RTL {
     _decls  :: [Declaration],
-    _combs  :: M.Map Ref Expr,
+    _combs  :: M.Map LValue Expr,
     _blocks :: M.Map Trigger Block
 }
 
@@ -41,10 +41,8 @@ data Edge = PosEdge Ref
 
 data Block = Block {
     _conds  :: M.Map Expr (Block,Block),
-    _writes :: Update
+    _writes :: M.Map LValue Expr
 } deriving (Eq)
-
-type Update = M.Map LValue Expr
 
 data LValue = IndexedRef Ref Expr
             | NormalRef Ref
