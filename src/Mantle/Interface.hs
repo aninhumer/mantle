@@ -56,6 +56,10 @@ combOutput x = do
 refInput :: Ref -> Input a
 refInput x = Input $ M.singleton (NormalRef x) unOutput
 
+indexedInput :: Ref -> Expr -> Input a
+indexedInput x e =
+    Input $ M.singleton (IndexedRef x e) unOutput
+
 assocsInput :: [(LValue, Output a -> Expr)] -> Input a
 assocsInput xs =
     Input $ M.fromListWith (error "Conflicting Inputs") xs
