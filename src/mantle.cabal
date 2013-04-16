@@ -27,7 +27,8 @@ library
         Mantle.Bits,
         Mantle.Examples.Counter,
         Mantle.Examples.Channels,
-        Mantle.Examples.FIFO
+        Mantle.Examples.FIFO,
+        Mantle.Examples.TPad
     other-extensions:
         Rank2Types,
         TypeFamilies,
