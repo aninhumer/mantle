@@ -23,6 +23,7 @@ library
         Mantle.Prelude,
         Mantle.Verilog,
         Mantle.Vector,
+        Mantle.Vector.Lits,
         Mantle.Bits,
         Mantle.Examples.Counter,
         Mantle.Examples.Channels,
