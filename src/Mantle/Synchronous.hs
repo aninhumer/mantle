@@ -33,7 +33,7 @@ type ClockReset = (Clock, Reset)
 
 type Synchronous = ReaderT ClockReset Circuit
 
-type SyncComp ifc = FlipIfc ifc -> Synchronous ()
+type SyncComp ifc = Component Synchronous ifc
 
 instance MonadCircuit Synchronous where
     liftCircuit = lift

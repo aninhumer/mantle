@@ -16,7 +16,7 @@ import Mantle.Examples.Channels
 type FIFO a = Pipe a a
 
 fifo :: Bits a => SyncComp (FIFO a)
-fifo (Server inchan outchan) = do
+fifo (Server inchan outchan) = component $ do
 
     val  <- regU
     full <- reg False
@@ -34,7 +34,7 @@ fifo (Server inchan outchan) = do
 
 
 fifoChain :: forall a. (Integral a, Bits a) => SyncComp (FIFO a)
-fifoChain (Server inchan outchan) = do
+fifoChain (Server inchan outchan) = component $ do
     fifoA :: FIFO a <- make fifo
     fifoB :: FIFO a <- make fifo
     inchan >-> fifoA

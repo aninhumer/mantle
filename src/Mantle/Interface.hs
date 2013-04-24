@@ -114,7 +114,11 @@ instance (Direction d, Bits a) => Interface (Signal a d) where
     (=:) = bindSignal
 
 
-type Component c ifc = FlipIfc ifc -> c ()
+type Component c ifc = FlipIfc ifc -> c (VoidIfc ifc)
+
+component :: MonadCircuit mc
+    => mc () -> mc (VoidIfc ifc)
+component c = c >> return VoidIfc
 
 make :: (Interface ifc, MonadCircuit c) =>
     Component c ifc -> c ifc

@@ -12,7 +12,7 @@ import Mantle.Synchronous
 import Mantle.Verilog
 
 counter :: SyncComp (Output Int)
-counter out = do
+counter out = component $ do
     count <- reg 0
     onClock $ do
         count <=: rd count + 1
@@ -20,7 +20,7 @@ counter out = do
 
 extCounter :: Synchronous ()
 extCounter = do
-    (out :: Output Int) <- make counter
+    out <- make counter
     ext <- extOutput "count"
     ext =: out
 
