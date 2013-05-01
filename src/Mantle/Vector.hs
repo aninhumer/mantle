@@ -28,7 +28,7 @@ instance (V.Arity n, Interface a) =>
 extInputVec :: forall mc n a . (MonadCircuit mc, V.Arity n, Bits a)
     => String -> mc (Vec n (Output a))
 extInputVec name = do
-    (ExtInput x :: ExtInput a) <- newExtInput name
+    (ExtInput x :: ExtInput (Vec n a)) <- newExtInput name
     return $ V.generate $ pos x
   where
     pos x i = index (literal i) (Output (Var x))
@@ -36,7 +36,7 @@ extInputVec name = do
 extOutputVec :: forall mc n a. (MonadCircuit mc, V.Arity n, Bits a)
     => String -> mc (Vec n (Input a))
 extOutputVec name = do
-    (ExtOutput x :: ExtOutput a) <- newExtOutput name
+    (ExtOutput x :: ExtOutput (Vec n a)) <- newExtOutput name
     return $ V.generate $ pos x
   where
     pos x i = indexedInput x (Lit $ Dec $ toInteger i)
