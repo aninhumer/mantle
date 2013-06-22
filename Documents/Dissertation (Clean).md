@@ -39,7 +39,7 @@ In order to explain the advantages and disadvantages of each model, the next thr
 
 ## SystemVerilog
 
-SystemVerilog is a superset of Verilog-2005, created by Accellera to incorporate and standardise several proprietary Verilog extensions[@evolutionsystemverilog]. It adds many new features, including new datatypes and even classes. However the majority of these features are only intended for simulation and verification, and cannot be synthesised. Since we are interested in new abstractions for hardware, we will only discuss those features which are synthesisable.
+SystemVerilog is a superset of Verilog-2005, created by Accellera to incorporate and standardise several proprietary Verilog extensions. It adds many new features, including new datatypes and even classes. However the majority of these features are only intended for simulation and verification, and cannot be synthesised. Since we are interested in new abstractions for hardware, we will only discuss those features which are synthesisable.
 
 ### Specialised Always Blocks
 
@@ -105,7 +105,7 @@ While the new simulation and verification features are useful additions to the d
 
 ## Lava
 
-Lava is an experimental HDL, originally created at Chalmers University[@koenthesis], which has served as a basis for a variety of research into language design. Variants exploring different possibilities have been developed by other institutions[@kansaslava][@yorklava], and even FPGA manufacturer Xilinx[@xilinxlava]. The language is based on a dataflow model of hardware, which is composed from gate level primitives using a Haskell DSL. A similar technique is used by this project, and indeed this is the origin of the name "Mantle".
+Lava is an experimental HDL, originally created at Chalmers University, which has served as a basis for a variety of research into language design. Variants exploring different possibilities have been developed by other institutions, and even FPGA manufacturer Xilinx. The language is based on a dataflow model of hardware, which is composed from gate level primitives using a Haskell DSL. A similar technique is used by this project, and indeed this is the origin of the name "Mantle".
 
 ### Dataflow
 
@@ -136,7 +136,7 @@ Another more practical problem with Lava is that modelling components as functio
 
 ## Bluespec
 
-Bluespec is a commercial hardware description language based on Haskell. It was originally created at Sandburst for designing 10Gbit routers, and is now being developed by a spin-off company Bluespec, Inc[@historyhaskell]. The language has shown to be effective tool for architectures research at Cambridge[@bluehive].
+Bluespec is a commercial hardware description language based on Haskell. It was originally created at Sandburst for designing 10Gbit routers, and is now being developed by a spin-off company Bluespec, Inc. The language has shown to be effective tool for architectures research at Cambridge.
 
 Bluespec deserves special mention here, as my experiences using the language (both positive and negative) as part of a research internship were the inspiration for this project.
 
@@ -490,7 +490,7 @@ In order to combine these two monads together we use a monad transformer. This i
 data Circuit a = Circuit (StateT Int (Writer RTL) a)
 ```
 
-Finally we need to translate this model into Verilog code. This turns out to be relatively trivial, as the structure matches that of a Verilog program pretty closely. The generator merely needs to deconstruct the tree, and compose corresponding code. In order to give slightly nicer output we use a pretty printing combinator library[@pprint], which use a set of combinators to construct a document structure. From this, neatly formatted source can be generated.
+Finally we need to translate this model into Verilog code. This turns out to be relatively trivial, as the structure matches that of a Verilog program pretty closely. The generator merely needs to deconstruct the tree, and compose corresponding code. In order to give slightly nicer output we use a pretty printing combinator library, which use a set of combinators to construct a document structure. From this, neatly formatted source can be generated.
 
 
 ## Synchronous
